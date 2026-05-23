@@ -341,12 +341,98 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e}
 .img-preview img{width:100%;max-height:160px;object-fit:cover;display:block}
 
 /* ── RESPONSIVE ── */
-@media(max-width:600px){
-  #sidebar{position:absolute;z-index:100;height:100vh;box-shadow:4px 0 18px rgba(0,0,0,.3)}
-  #sidebar.collapsed{width:0;min-width:0}
+@media(max-width:768px){
+  /* Sidebar */
+  #sidebar{position:fixed;z-index:100;height:100vh;
+    box-shadow:4px 0 18px rgba(0,0,0,.3);transition:width .22s}
+  #sidebar.collapsed{width:0;min-width:0;overflow:hidden}
+
+  /* Dashboard main */
+  #viewDashboard{flex-direction:column}
+  #dashMain{width:100%}
+
+  /* Topbar */
+  .topbar{padding:10px 14px}
+  .tb-title{font-size:13px}
+  .tb-bc{display:none}
+  #tbDate{display:none}
+
+  /* Page content */
   .page-content{padding:12px}
-  .proker-table{font-size:12px}
-  .proker-table th,.proker-table td{padding:8px 10px}
+
+  /* Summary cards */
+  .sum-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .sc .vl{font-size:20px}
+
+  /* Quick cards */
+  .qcard-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .qcard{padding:12px;gap:8px}
+  .qcard-ic{width:32px;height:32px}
+  .qcard-t{font-size:12px}
+  .qcard-s{font-size:10px}
+
+  /* Gantt */
+  .gantt-wrap{font-size:11px}
+  .rinfo{width:130px;min-width:130px}
+  .pname{font-size:11px}
+  .psub{font-size:10px}
+  .ctrl{gap:6px}
+  .fbtn{padding:4px 10px;font-size:11px}
+
+  /* Anggota */
+  .mgrid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .mcard{padding:12px}
+  .avlg{width:42px;height:42px;font-size:14px}
+  .mn{font-size:12px}
+  .mr,.mni{font-size:10px}
+
+  /* Dokumentasi */
+  .dgrid{grid-template-columns:repeat(2,1fr);gap:10px}
+
+  /* Galeri */
+  .ggrid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .gthumb{height:100px}
+
+  /* Tabel proker */
+  .proker-table{font-size:11px}
+  .proker-table th,.proker-table td{padding:7px 8px}
+  .tbl-actions{flex-direction:column;gap:3px}
+  .btn-edit,.btn-del{padding:4px 8px;font-size:10px}
+
+  /* Modal */
+  .modal-box{padding:18px;border-radius:14px}
+  .modal-hd h3{font-size:14px}
+
+  /* Login */
+  .login-card{padding:20px;border-radius:16px}
+  .form-title{font-size:16px}
+  .brand-label{font-size:13px}
+
+  /* Page header */
+  .page-hd-row{flex-direction:column}
+  .btn-add-content,.btn-add-proker{width:100%;justify-content:center}
+
+  /* Topbar right */
+  .tb-right{gap:6px}
+  .logout-btn span{display:none}
+  .logout-btn{padding:5px 7px}
+
+  /* Map */
+  .map-frame{height:220px}
+
+  /* Info rows lokasi */
+  .irow{flex-direction:column;gap:2px}
+  .irow .k{min-width:unset}
+}
+
+/* Layar sangat kecil */
+@media(max-width:380px){
+  .sum-grid{grid-template-columns:repeat(2,1fr)}
+  .qcard-grid{grid-template-columns:1fr 1fr}
+  .mgrid{grid-template-columns:1fr 1fr}
+  .dgrid{grid-template-columns:1fr}
+  .ggrid{grid-template-columns:repeat(2,1fr)}
+  .page-content{padding:8px}
 }
 </style>
 </head>
