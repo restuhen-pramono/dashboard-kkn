@@ -1192,6 +1192,9 @@ function doLogin(){
     if(!res.success){showAlert(res.message,'err');return;}
     currentUser=res.user;
     isGuest=false;
+    // Simpan session ke localStorage
+    localStorage.setItem('kknUser', JSON.stringify(res.user));
+    localStorage.setItem('kknIsGuest', 'false');
     setupDashboard(res.user);
     showDashboard();
     loadAllData();
@@ -1205,6 +1208,9 @@ function doLogin(){
 function doGuestLogin(){
   isGuest=true;
   currentUser=null;
+  // Simpan session tamu
+  localStorage.setItem('kknIsGuest', 'true');
+  localStorage.removeItem('kknUser');
   setupDashboard(null);
   showDashboard();
   loadAllData();
@@ -1419,6 +1425,9 @@ function doLogout(){
   var label=isGuest?'Yakin ingin keluar dari mode tamu?':'Yakin ingin keluar?';
   if(!confirm(label)) return;
   currentUser=null; isGuest=false; prokerData=[];
+  // Hapus session dari localStorage
+  localStorage.removeItem('kknUser');
+  localStorage.removeItem('kknIsGuest');
   _editProkerIdx=null; _editDokIdx=null; _editGaleriIdx=null;
   document.getElementById('inUser').value='';
   document.getElementById('inPw').value='';
@@ -2023,7 +2032,14 @@ function goPage(id){
   document.getElementById('tbTitle').textContent=PAGE_LABELS[id]||id;
   document.getElementById('tbBc').textContent=PAGE_LABELS[id]||id;
   if(id==='kelola') renderKelolaTable();
+
+  // Tutup sidebar dan overlay saat pindah halaman di mobile
+  if(window.innerWidth<=768){
+    document.getElementById('sidebar').classList.add('collapsed');
+    document.getElementById('sidebarOverlay').style.display='none';
+  }
 }
+
 function showLp(){document.getElementById('lpOverlay').classList.add('show');}
 function closeLp(){document.getElementById('lpOverlay').classList.remove('show');}
 
@@ -2037,6 +2053,36 @@ function closeSidebarMobile(){
   document.getElementById('sidebar').classList.add('collapsed');
   document.getElementById('sidebarOverlay').style.display='none';
 }
+// ════════════════════════════════════════════════
+//  RESTORE SESSION SAAT REFRESH
+// ════════════════════════════════════════════════
+(function restoreSession(){
+  var savedUser  = localStorage.getItem('kknUser');
+  var savedGuest = localStorage.getItem('kknIsGuest');
+
+  if(savedGuest === 'true'){
+    // Restore mode tamu
+    isGuest=true;
+    currentUser=null;
+    setupDashboard(null);
+    showDashboard();
+    loadAllData();
+  } else if(savedUser){
+    // Restore user yang login
+    try{
+      var user = JSON.parse(savedUser);
+      currentUser=user;
+      isGuest=false;
+      setupDashboard(user);
+      showDashboard();
+      loadAllData();
+    } catch(e){
+      // Jika data rusak, hapus dan tampilkan login
+      localStorage.removeItem('kknUser');
+      localStorage.removeItem('kknIsGuest');
+    }
+  }
+})();
 </script>
 <!-- Overlay untuk tutup sidebar di mobile -->
 <div id="sidebarOverlay" onclick="closeSidebarMobile()"
