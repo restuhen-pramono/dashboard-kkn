@@ -1,0 +1,1986 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard PLENGER</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e}
+
+/* ── VIEW WRAPPER ── */
+#viewLogin{display:flex;min-height:100vh;align-items:center;justify-content:center;
+  flex-direction:column;padding:20px;background:#1a1a2e;position:relative;overflow:hidden}
+#viewDashboard{display:none;height:100vh;overflow:hidden;flex-direction:row}
+
+#viewLogin::before{content:'';position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(15,52,96,.6),transparent 60%),
+             radial-gradient(ellipse 60% 50% at 80% 90%,rgba(233,69,96,.15),transparent 60%)}
+.grid-bg{position:fixed;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.03)1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.03)1px,transparent 1px);background-size:48px 48px}
+
+/* ── LOGIN CARD ── */
+.login-wrap{position:relative;width:100%;max-width:440px;z-index:1}
+.branding{text-align:center;margin-bottom:24px}
+.brand-badge{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);border-radius:50px;padding:8px 18px 8px 10px}
+.brand-icon{width:34px;height:34px;background:linear-gradient(135deg,#0f3460,#e94560);
+  border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff}
+.brand-label{color:#fff;font-size:14px;font-weight:700}
+.brand-sub{color:rgba(255,255,255,.4);font-size:12px;margin-top:6px}
+.login-card{background:#fff;border-radius:22px;padding:32px;box-shadow:0 24px 64px rgba(0,0,0,.4)}
+.login-footer{text-align:center;margin-top:16px;font-size:11px;color:rgba(255,255,255,.25)}
+
+/* ── TAB ── */
+.tab-bar{display:flex;background:#f1f5f9;border-radius:10px;padding:4px;margin-bottom:24px;gap:4px}
+.tab-btn{flex:1;padding:9px;border:none;border-radius:7px;background:transparent;
+  font-size:13px;font-weight:600;color:#94a3b8;cursor:pointer;transition:all .18s;font-family:inherit}
+.tab-btn.active{background:#fff;color:#1a1a2e;box-shadow:0 1px 6px rgba(0,0,0,.1)}
+.form-pane{display:none}
+
+/* ── ALERT ── */
+.alert{padding:10px 14px;border-radius:10px;font-size:13px;font-weight:500;
+  margin-bottom:16px;display:flex;align-items:flex-start;gap:8px}
+.alert.hidden{display:none!important}
+.alert-error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+.alert-success{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.alert svg{width:14px;height:14px;flex-shrink:0;margin-top:1px}
+
+/* ── FORM ── */
+.form-title{font-size:19px;font-weight:800;color:#1a1a2e;margin-bottom:3px}
+.form-sub{font-size:12px;color:#94a3b8;margin-bottom:20px}
+.fgroup{margin-bottom:14px}
+.fgroup label{display:block;font-size:11px;font-weight:700;color:#64748b;
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.iwrap{position:relative}
+.iwrap .ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  width:15px;height:15px;color:#94a3b8;pointer-events:none}
+.iwrap input{width:100%;padding:10px 12px 10px 34px;border:1.5px solid #e2e8f0;
+  border-radius:9px;font-size:13px;color:#1a1a2e;outline:none;font-family:inherit;
+  transition:border-color .18s,box-shadow .18s}
+.iwrap input:focus{border-color:#0f3460;box-shadow:0 0 0 3px rgba(15,52,96,.1)}
+.toggle-pw{position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;color:#94a3b8;display:flex;padding:2px}
+.toggle-pw:hover{color:#1a1a2e}
+.auth-code-wrap input{letter-spacing:4px;font-weight:700;font-size:15px;
+  text-transform:uppercase;text-align:center;padding-left:12px}
+.auth-hint{font-size:11px;color:#94a3b8;margin-top:4px;display:flex;align-items:center;gap:4px}
+.pw-bars{display:flex;gap:3px;margin-top:5px}
+.pw-bar{flex:1;height:3px;border-radius:2px;background:#e2e8f0;transition:background .25s}
+.pw-bar.w{background:#e94560}.pw-bar.m{background:#f59e0b}.pw-bar.s{background:#22c55e}
+.pw-hint{font-size:11px;color:#94a3b8;margin-top:3px}
+.submit-btn{width:100%;padding:12px;background:#1a1a2e;color:#fff;border:none;
+  border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:background .18s;font-family:inherit}
+.submit-btn:hover{background:#0f3460}
+.submit-btn:disabled{opacity:.55;cursor:not-allowed}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:#cbd5e1;font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:#e2e8f0}
+.link-text{color:#0f3460;font-weight:700;cursor:pointer}
+.link-text:hover{text-decoration:underline}
+.back-link{display:inline-flex;align-items:center;gap:5px;color:#94a3b8;font-size:12px;
+  cursor:pointer;margin-bottom:16px;transition:color .15s}
+.back-link:hover{color:#1a1a2e}
+.back-link svg{width:13px;height:13px}
+.otp-wrap{display:flex;gap:8px;justify-content:center;margin:8px 0}
+.otp-wrap input{width:44px;height:52px;border:1.5px solid #e2e8f0;border-radius:9px;
+  font-size:22px;font-weight:700;text-align:center;outline:none;font-family:inherit;
+  transition:border-color .18s,box-shadow .18s}
+.otp-wrap input:focus{border-color:#0f3460;box-shadow:0 0 0 3px rgba(15,52,96,.1)}
+
+/* ── DASHBOARD ── */
+#sidebar{width:224px;min-width:224px;background:#1a1a2e;display:flex;flex-direction:column;
+  height:100vh;transition:width .22s;overflow:hidden}
+#sidebar.collapsed{width:58px;min-width:58px}
+.sb-brand{padding:18px 14px 14px;border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;gap:9px}
+.sb-logo{width:32px;height:32px;background:#0f3460;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}
+.sb-t1{color:#fff;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden}
+.sb-t2{color:rgba(255,255,255,.38);font-size:11px;white-space:nowrap;margin-top:1px}
+.sb-section{padding:10px 14px 3px;color:rgba(255,255,255,.28);font-size:10px;
+  letter-spacing:1px;text-transform:uppercase;white-space:nowrap;overflow:hidden}
+#sidebar.collapsed .sb-section{height:0;padding:0;overflow:hidden}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 12px;margin:2px 7px;
+  border-radius:7px;cursor:pointer;color:rgba(255,255,255,.58);font-size:13px;
+  transition:all .15s;white-space:nowrap;overflow:hidden}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-item.active{background:#0f3460;color:#fff;font-weight:600}
+.nav-item svg{width:15px;height:15px;flex-shrink:0}
+.nav-item .nl{overflow:hidden}
+#sidebar.collapsed .nl{display:none}
+.sb-spacer{flex:1}
+.sb-toggle{margin:10px 7px;padding:8px 12px;background:rgba(255,255,255,.05);border:none;
+  border-radius:7px;cursor:pointer;color:rgba(255,255,255,.45);display:flex;align-items:center;
+  gap:9px;font-size:12px;white-space:nowrap;overflow:hidden;transition:background .15s;font-family:inherit}
+.sb-toggle:hover{background:rgba(255,255,255,.1);color:#fff}
+#sidebar.collapsed .sb-toggle .nl{display:none}
+#dashMain{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:#fff;border-bottom:1px solid #eee;padding:13px 22px;
+  display:flex;align-items:center;gap:12px;flex-shrink:0}
+.hamburger{background:none;border:none;cursor:pointer;padding:3px;
+  display:flex;flex-direction:column;gap:4px}
+.hamburger span{display:block;width:17px;height:2px;background:#555;border-radius:2px}
+.tb-title{font-size:15px;font-weight:700;color:#1a1a2e}
+.tb-bc{font-size:11px;color:#aaa;margin-top:1px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.avatar{width:30px;height:30px;background:#0f3460;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
+.logout-btn{background:none;border:1.5px solid #e2e8f0;border-radius:7px;padding:5px 9px;
+  cursor:pointer;color:#888;font-size:12px;display:flex;align-items:center;gap:4px;
+  transition:all .15s;font-family:inherit}
+.logout-btn:hover{border-color:#ef4444;color:#ef4444}
+.page-content{flex:1;overflow-y:auto;padding:22px}
+.page{display:none}.page.active{display:block}
+.page-hd{margin-bottom:18px}
+.page-hd h2{font-size:19px;font-weight:700}
+.page-hd p{font-size:13px;color:#888;margin-top:3px}
+.page-hd-row{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+/* ── CARDS ── */
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
+.sc{background:#fff;border-radius:11px;padding:14px 16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.sc .lb{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px}
+.sc .vl{font-size:26px;font-weight:700;margin-top:3px}
+.qcard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.qcard{background:#fff;border-radius:11px;padding:16px;display:flex;align-items:center;gap:12px;
+  cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:box-shadow .15s}
+.qcard:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.qcard-ic{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.qcard-t{font-size:13px;font-weight:600}.qcard-s{font-size:11px;color:#888;margin-top:2px}
+
+/* ── GANTT ── */
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px}
+.fbtn{padding:5px 14px;border-radius:18px;border:1.5px solid #ddd;background:#fff;
+  font-size:12px;cursor:pointer;color:#555;transition:all .18s;font-family:inherit}
+.fbtn:hover{border-color:#0f3460;color:#0f3460}
+.fbtn.active{background:#0f3460;color:#fff;border-color:#0f3460}
+.ssort{padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:12px;
+  background:#fff;cursor:pointer;color:#555;margin-left:auto;font-family:inherit}
+.gantt-wrap{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow-x:auto}
+.gantt-hdr{display:flex;border-bottom:1.5px solid #f0f0f0;padding:8px 0 8px 210px;
+  background:#fff;position:sticky;top:0;z-index:2}
+.dlbl{font-size:10px;color:#bbb;text-align:center;flex-shrink:0}
+.grow{display:flex;align-items:center;border-bottom:1px solid #f6f6f6;padding:8px 0;transition:background .13s}
+.grow:hover{background:#fafafa}.grow.thl{background:#fffbeb}.grow:last-child{border-bottom:none}
+.rinfo{width:210px;min-width:210px;padding:0 12px}
+.pname{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.psub{font-size:11px;color:#888;margin-top:2px}
+.badge{display:inline-block;padding:2px 8px;border-radius:18px;font-size:10px;font-weight:600;margin-top:3px}
+.bl{background:#f0f0f0;color:#777}.bp{background:#fef3c7;color:#b45309}.bs{background:#dcfce7;color:#166534}
+.rchart{flex:1;position:relative;height:46px;display:flex;align-items:center}
+.glines{position:absolute;inset:0;display:flex;pointer-events:none}
+.gl{flex-shrink:0;border-left:1px dashed #f0f0f0}
+.bar{position:absolute;height:24px;border-radius:5px;display:flex;align-items:center;
+  overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.bar.belum{background:#e0e0e0}.bar.proses{background:#fde68a}.bar.selesai{background:#bbf7d0}
+.bprog{height:100%;border-radius:5px 0 0 5px;transition:width .35s}
+.belum .bprog{background:#9e9e9e}.proses .bprog{background:#f59e0b}.selesai .bprog{background:#22c55e}
+.blbl{position:absolute;left:7px;font-size:10px;font-weight:700;color:#fff;
+  white-space:nowrap;text-shadow:0 0 3px rgba(0,0,0,.3);pointer-events:none}
+.tdline{position:absolute;top:0;bottom:0;width:2px;background:#ef4444;z-index:3}
+.tdline::after{content:'Hari ini';position:absolute;top:-16px;left:50%;transform:translateX(-50%);
+  font-size:9px;color:#ef4444;font-weight:700;white-space:nowrap}
+
+/* ── ANGGOTA ── */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.mcard{background:#fff;border-radius:11px;padding:18px;text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);transition:box-shadow .15s}
+.mcard:hover{box-shadow:0 4px 14px rgba(0,0,0,.1)}
+.avlg{width:54px;height:54px;border-radius:50%;margin:0 auto 10px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff}
+.mn{font-size:13px;font-weight:600}.mr{font-size:12px;color:#888;margin-top:2px}
+.mni{font-size:11px;color:#bbb;margin-top:2px}
+
+/* ── LOKASI ── */
+.map-frame{width:100%;height:340px;border:none;border-radius:11px;display:block}
+.linfo{background:#fff;border-radius:11px;padding:18px;margin-top:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.irow{display:flex;gap:10px;margin-bottom:8px}
+.irow .k{font-size:12px;color:#888;min-width:140px;flex-shrink:0}
+.irow .v{font-size:13px;font-weight:500}
+
+/* ── DOKUMENTASI ── */
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.dcard{background:#fff;border-radius:11px;overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);transition:box-shadow .15s;position:relative}
+.dcard:hover{box-shadow:0 4px 14px rgba(0,0,0,.1)}
+.dthumb{height:110px;display:flex;align-items:center;justify-content:center}
+.dbody{padding:12px}
+.dtitle{font-size:13px;font-weight:600}
+.dmeta{font-size:11px;color:#aaa;margin-top:3px}
+.dtag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;
+  font-weight:600;margin-top:6px;background:#e8f0fe;color:#1a5db5}
+.dok-link{display:inline-flex;align-items:center;gap:4px;margin-top:8px;
+  font-size:12px;color:#0f3460;font-weight:600;text-decoration:none}
+.dok-link:hover{text-decoration:underline}
+
+/* ── GALERI ── */
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.gitem{background:#fff;border-radius:9px;overflow:hidden;
+  box-shadow:0 2px 5px rgba(0,0,0,.06);cursor:pointer;transition:box-shadow .15s;position:relative}
+.gitem:hover{box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.gthumb{height:130px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.gthumb img{width:100%;height:100%;object-fit:cover}
+.gthumb-icon{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.gcap{padding:8px 10px;font-size:12px;color:#555;font-weight:500}
+
+/* ── CARD EDIT OVERLAY ── */
+.card-actions{position:absolute;top:6px;right:6px;display:none;gap:4px}
+.dcard:hover .card-actions,
+.gitem:hover .card-actions{display:flex}
+.ca-btn{padding:4px 8px;border:none;border-radius:6px;font-size:11px;
+  font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.ca-edit{background:#1a1a2e;color:#fff}
+.ca-del{background:#ef4444;color:#fff}
+.ca-btn:hover{opacity:.85}
+
+/* ── TOMBOL TAMBAH KONTEN ── */
+.btn-add-content{display:none;align-items:center;gap:6px;padding:8px 16px;
+  background:#0f3460;color:#fff;border:none;border-radius:8px;font-size:13px;
+  font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.btn-add-content:hover{background:#1a1a2e}
+.btn-add-content svg{width:13px;height:13px}
+
+/* ── KELOLA PROKER TABLE ── */
+.proker-table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;
+  overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.proker-table th{padding:11px 14px;font-size:11px;font-weight:700;color:#64748b;
+  text-transform:uppercase;letter-spacing:.5px;background:#f8fafc;text-align:left;
+  border-bottom:1px solid #e2e8f0}
+.proker-table td{padding:12px 14px;font-size:13px;color:#1a1a2e;border-bottom:1px solid #f6f6f6;
+  vertical-align:middle}
+.proker-table tr:last-child td{border-bottom:none}
+.proker-table tr:hover td{background:#fafafa}
+.tbl-actions{display:flex;gap:6px}
+.btn-edit{padding:5px 12px;background:#e8f0fe;color:#1a5db5;border:none;border-radius:7px;
+  font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.btn-edit:hover{background:#d0e4fb}
+.btn-del{padding:5px 12px;background:#fee2e2;color:#991b1b;border:none;border-radius:7px;
+  font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.btn-del:hover{background:#fecaca}
+.btn-add-proker{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;
+  background:#1a1a2e;color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:inherit;transition:background .15s}
+.btn-add-proker:hover{background:#0f3460}
+.btn-add-proker svg{width:14px;height:14px}
+
+/* ── GUEST ── */
+.guest-badge{display:inline-flex;align-items:center;gap:5px;background:#fef3c7;color:#92400e;
+  border:1px solid #fde68a;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600}
+.nav-login-only{display:none}
+
+/* ── LOGIN PROMPT ── */
+.lp-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;
+  align-items:center;justify-content:center}
+.lp-overlay.show{display:flex}
+.lp-box{background:#fff;border-radius:18px;padding:32px;max-width:360px;width:90%;
+  text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+.lp-icon{font-size:40px;margin-bottom:12px}
+.lp-box h3{font-size:17px;font-weight:700;color:#1a1a2e;margin-bottom:6px}
+.lp-box p{font-size:13px;color:#64748b;margin-bottom:20px;line-height:1.6}
+.lp-btns{display:flex;gap:10px;justify-content:center}
+.lp-btn-main{padding:10px 24px;background:#1a1a2e;color:#fff;border:none;border-radius:9px;
+  font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
+.lp-btn-main:hover{background:#0f3460}
+.lp-btn-sec{padding:10px 24px;background:#f1f5f9;color:#475569;border:none;border-radius:9px;
+  font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.lp-btn-sec:hover{background:#e2e8f0}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;
+  align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal-box{background:#fff;border-radius:18px;padding:28px;width:100%;max-width:500px;
+  max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-hd h3{font-size:16px;font-weight:700;color:#1a1a2e}
+.modal-close{background:none;border:none;cursor:pointer;color:#94a3b8;font-size:22px;
+  line-height:1;padding:2px}
+.modal-close:hover{color:#1a1a2e}
+.mfgroup{margin-bottom:14px}
+.mfgroup label{display:block;font-size:11px;font-weight:700;color:#64748b;
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.mfgroup input,.mfgroup select,.mfgroup textarea{width:100%;padding:10px 12px;
+  border:1.5px solid #e2e8f0;border-radius:9px;font-size:13px;color:#1a1a2e;
+  outline:none;font-family:inherit;transition:border-color .18s}
+.mfgroup input:focus,.mfgroup select:focus,.mfgroup textarea:focus{
+  border-color:#0f3460;box-shadow:0 0 0 3px rgba(15,52,96,.1)}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;
+  padding-top:16px;border-top:1px solid #f1f5f9}
+
+/* ── UPLOAD AREA ── */
+.upload-tabs{display:flex;gap:0;margin-bottom:12px;border:1.5px solid #e2e8f0;border-radius:9px;overflow:hidden}
+.upload-tab{flex:1;padding:8px;border:none;background:transparent;font-size:12px;font-weight:600;
+  color:#94a3b8;cursor:pointer;font-family:inherit;transition:all .15s}
+.upload-tab.active{background:#0f3460;color:#fff}
+.upload-area{border:2px dashed #e2e8f0;border-radius:9px;padding:24px;text-align:center;
+  cursor:pointer;transition:all .2s;background:#fafafa}
+.upload-area:hover,.upload-area.dragover{border-color:#0f3460;background:#f0f4ff}
+.upload-area input[type=file]{display:none}
+.upload-area .ua-icon{font-size:28px;margin-bottom:8px}
+.upload-area .ua-text{font-size:13px;color:#64748b}
+.upload-area .ua-hint{font-size:11px;color:#94a3b8;margin-top:4px}
+.upload-progress{margin-top:10px;display:none}
+.progress-bar-wrap{background:#f1f5f9;border-radius:20px;height:6px;overflow:hidden;margin-bottom:6px}
+.progress-bar-fill{height:100%;background:#0f3460;border-radius:20px;transition:width .3s}
+.progress-text{font-size:12px;color:#64748b;text-align:center}
+.file-chosen{display:none;align-items:center;gap:8px;padding:10px 12px;
+  background:#f0f4ff;border-radius:9px;margin-top:8px}
+.file-chosen .fc-icon{font-size:20px}
+.file-chosen .fc-name{font-size:13px;color:#1a1a2e;font-weight:600;flex:1}
+.file-chosen .fc-size{font-size:11px;color:#94a3b8}
+.file-chosen .fc-remove{background:none;border:none;cursor:pointer;color:#94a3b8;font-size:16px}
+.file-chosen .fc-remove:hover{color:#ef4444}
+.img-preview{margin-top:10px;display:none;border-radius:9px;overflow:hidden}
+.img-preview img{width:100%;max-height:160px;object-fit:cover;display:block}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  #sidebar{position:absolute;z-index:100;height:100vh;box-shadow:4px 0 18px rgba(0,0,0,.3)}
+  #sidebar.collapsed{width:0;min-width:0}
+  .page-content{padding:12px}
+  .proker-table{font-size:12px}
+  .proker-table th,.proker-table td{padding:8px 10px}
+}
+</style>
+</head>
+<body>
+
+<!-- ════ VIEW LOGIN ════ -->
+<div id="viewLogin">
+  <div class="grid-bg"></div>
+  <div class="login-wrap">
+    <div class="branding">
+      <div class="brand-badge">
+        <div class="brand-icon">PG</div>
+        <span class="brand-label">Dashboard PLENGER</span>
+      </div>
+      <div class="brand-sub">PRABOWO &nbsp;·&nbsp; GIBRAN</div>
+    </div>
+
+    <div class="login-card">
+      <div class="tab-bar" id="tabBar">
+        <button class="tab-btn active" id="tabMasuk"  onclick="switchTab('masuk')">Masuk</button>
+        <button class="tab-btn"        id="tabDaftar" onclick="switchTab('daftar')">Daftar</button>
+      </div>
+
+      <div class="alert hidden" id="alertBox">
+        <svg id="alertIco" viewBox="0 0 16 16" fill="currentColor"></svg>
+        <span id="alertTxt"></span>
+      </div>
+
+      <!-- MASUK -->
+      <div class="form-pane" id="paneMasuk" style="display:block">
+        <div class="form-title">Selamat datang</div>
+        <div class="form-sub">Masuk ke dashboard Presiden Anda</div>
+        <div class="fgroup">
+          <label>Username</label>
+          <div class="iwrap">
+            <svg class="ico" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 14c0-3.04 2.46-5.5 5.5-5.5s5.5 2.46 5.5 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input type="text" id="inUser" placeholder="Username" autocomplete="username"/>
+          </div>
+        </div>
+        <div class="fgroup">
+          <label>Password</label>
+          <div class="iwrap">
+            <svg class="ico" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input type="password" id="inPw" placeholder="••••••••" autocomplete="current-password"/>
+            <button class="toggle-pw" type="button" onclick="tglPw('inPw',this)" tabindex="-1">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 3C4.5 3 1.5 8 1.5 8s3 5 6.5 5 6.5-5 6.5-5S11.5 3 8 3z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button class="submit-btn" id="btnMasuk" onclick="doLogin()">
+          <span id="lblMasuk">Masuk</span>
+        </button>
+        <button class="submit-btn" id="btnGuest" onclick="doGuestLogin()"
+          style="background:#475569;margin-top:8px">
+          <span>&#128065; Masuk Sebagai Tamu</span>
+        </button>
+        <div style="text-align:center;margin-top:12px">
+          <span class="link-text" style="font-size:12px;color:#94a3b8;font-weight:500"
+            onclick="switchTab('lupa')">Lupa password?</span>
+        </div>
+        <div class="divider">atau</div>
+        <div style="text-align:center;font-size:13px;color:#64748b">
+          Belum punya akun?
+          <span class="link-text" onclick="switchTab('daftar')">Daftar sekarang</span>
+        </div>
+      </div>
+
+      <!-- DAFTAR -->
+      <div class="form-pane" id="paneDaftar">
+        <div class="form-title">Buat akun baru</div>
+        <div class="form-sub">Diperlukan kode autentikasi dari ketua kelompok</div>
+        <div class="fgroup">
+          <label>Nama Lengkap</label>
+          <div class="iwrap">
+            <svg class="ico" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 14c0-3.04 2.46-5.5 5.5-5.5s5.5 2.46 5.5 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input type="text" id="rNama" placeholder="Nama lengkap Anda"/>
+          </div>
+        </div>
+        <div class="fgroup">
+          <label>Email</label>
+          <div class="iwrap">
+            <svg class="ico" viewBox="0 0 16 16" fill="none"><rect x="2" y="4" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 5l6 4.5L14 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <input type="email" id="rEmail" placeholder="email@domain.com" autocomplete="email"/>
+          </div>
+          <div class="auth-hint">
+            <svg viewBox="0 0 16 16" fill="none" style="width:11px;height:11px;flex-shrink:0"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 7v4M8 5.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Email digunakan untuk reset password jika lupa.
+          </div>
+        </div>
+        <div class="fgroup">
+          <label>Username</label>
+          <div class="iwrap">
+            <svg class="ico" viewBox="0 0 16 16" fill="none"><path d="M13 8A5 5 0 113 8a5 5 0 0110 0z" stroke="currentColor" stroke-width="1.3"/><path d="M10 8c0 3-1 5-2 5s-2-2-2-5 1-5 2-5 2 2 2 5z" stroke="currentColor" stroke-width="1.3"/><path d="M3 8h10" stroke="currentColor" stroke-width="1.3"/></svg>
+            <input type="text" id="rUser" placeholder="huruf_kecil_angka"
+              oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')"/>
+          </div>
+        </div>
+        <div class="fgroup">
+          <label>Password</label>
+          <div class="iwrap">
+            <svg class="ico" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input type="password" id="rPw" placeholder="Min. 6 karakter" oninput="pwStrength(this.value)"/>
+            <button class="toggle-pw" type="button" onclick="tglPw('rPw',this)" tabindex="-1">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 3C4.5 3 1.5 8 1.5 8s3 5 6.5 5 6.5-5 6.5-5S11.5 3 8 3z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/></svg>
+            </button>
+          </div>
+          <div class="pw-bars"><div class="pw-bar" id="pb1"></div><div class="pw-bar" id="pb2"></div><div class="pw-bar" id="pb3"></div></div>
+          <div class="pw-hint" id="pwHint"></div>
+        </div>
+        <div class="fgroup">
+          <label>Kode Autentikasi</label>
+          <div class="iwrap auth-code-wrap">
+            <input type="text" id="rKode" placeholder="· · · · · ·" maxlength="20"/>
+          </div>
+          <div class="auth-hint">
+            <svg viewBox="0 0 16 16" fill="none" style="width:11px;height:11px;flex-shrink:0"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 7v4M8 5.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Kode diberikan oleh ketua kelompok. Tanpa kode akun tidak dapat dibuat.
+          </div>
+        </div>
+        <button class="submit-btn" id="btnDaftar" onclick="doDaftar()">
+          <span id="lblDaftar">Buat Akun</span>
+        </button>
+        <div class="divider">atau</div>
+        <div style="text-align:center;font-size:13px;color:#64748b">
+          Sudah punya akun?
+          <span class="link-text" onclick="switchTab('masuk')">Masuk di sini</span>
+        </div>
+      </div>
+
+      <!-- LUPA PASSWORD -->
+      <div class="form-pane" id="paneLupa">
+        <div id="lupaStep1">
+          <span class="back-link" onclick="switchTab('masuk')">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Kembali ke Login
+          </span>
+          <div class="form-title">Lupa Password</div>
+          <div class="form-sub">Masukkan email terdaftar. Kode OTP akan dikirim.</div>
+          <div class="fgroup">
+            <label>Email Terdaftar</label>
+            <div class="iwrap">
+              <svg class="ico" viewBox="0 0 16 16" fill="none"><rect x="2" y="4" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 5l6 4.5L14 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              <input type="email" id="lupaEmail" placeholder="email@domain.com"/>
+            </div>
+          </div>
+          <button class="submit-btn" id="btnLupa" onclick="doLupaPassword()">
+            <span id="lblLupa">Kirim Kode OTP</span>
+          </button>
+        </div>
+        <div id="lupaStep2" style="display:none">
+          <span class="back-link" onclick="resetLupaStep()">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Ganti email
+          </span>
+          <div class="form-title">Masukkan Kode OTP</div>
+          <div class="form-sub">Kode 6 digit dikirim ke <strong id="sentToEmail"></strong></div>
+          <div class="fgroup">
+            <label>Kode Verifikasi</label>
+            <div class="otp-wrap">
+              <input type="text" id="otp1" maxlength="1" oninput="otpNext(this,'otp2')"/>
+              <input type="text" id="otp2" maxlength="1" oninput="otpNext(this,'otp3')"/>
+              <input type="text" id="otp3" maxlength="1" oninput="otpNext(this,'otp4')"/>
+              <input type="text" id="otp4" maxlength="1" oninput="otpNext(this,'otp5')"/>
+              <input type="text" id="otp5" maxlength="1" oninput="otpNext(this,'otp6')"/>
+              <input type="text" id="otp6" maxlength="1" oninput="otpNext(this,null)"/>
+            </div>
+          </div>
+          <div style="font-size:12px;color:#94a3b8;margin-bottom:12px;text-align:center">
+            Tidak dapat kode?
+            <span class="link-text" style="font-size:12px" onclick="doLupaPassword()">Kirim ulang</span>
+          </div>
+          <button class="submit-btn" id="btnOtp" onclick="doVerifyOtp()">
+            <span id="lblOtp">Verifikasi Kode</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- RESET PASSWORD -->
+      <div class="form-pane" id="paneReset">
+        <div class="form-title">Buat Password Baru</div>
+        <div class="form-sub">Masukkan password baru untuk akun Anda.</div>
+        <div class="fgroup">
+          <label>Password Baru</label>
+          <div class="iwrap">
+            <svg class="ico" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input type="password" id="newPw1" placeholder="Min. 6 karakter"/>
+            <button class="toggle-pw" type="button" onclick="tglPw('newPw1',this)" tabindex="-1">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 3C4.5 3 1.5 8 1.5 8s3 5 6.5 5 6.5-5 6.5-5S11.5 3 8 3z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="fgroup">
+          <label>Konfirmasi Password</label>
+          <div class="iwrap">
+            <svg class="ico" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input type="password" id="newPw2" placeholder="Ulangi password baru"/>
+          </div>
+        </div>
+        <button class="submit-btn" id="btnReset" onclick="doResetPassword()">
+          <span id="lblReset">Simpan Password Baru</span>
+        </button>
+      </div>
+    </div>
+    <div class="login-footer">&#169; 2024 Presiden Konoha · All rights reserved</div>
+  </div>
+</div>
+
+<!-- ════ VIEW DASHBOARD ════ -->
+<div id="viewDashboard">
+  <nav id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">KKN</div>
+      <div style="overflow:hidden">
+        <div class="sb-t1">KKN Dashboard</div>
+        <div class="sb-t2" id="sbHello">Kelompok 7</div>
+      </div>
+    </div>
+    <div class="sb-section">Utama</div>
+    <div class="nav-item active" data-page="beranda">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z" fill="currentColor"/></svg>
+      <span class="nl">Beranda</span>
+    </div>
+    <div class="nav-item" data-page="timeline">
+      <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="2" rx="1" fill="currentColor" opacity=".5"/><rect x="2" y="7" width="9" height="2" rx="1" fill="currentColor"/><rect x="2" y="11" width="11" height="2" rx="1" fill="currentColor" opacity=".7"/></svg>
+      <span class="nl">Timeline Proker</span>
+    </div>
+    <div class="sb-section">Kelompok</div>
+    <div class="nav-item" data-page="anggota">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" fill="currentColor" opacity=".7"/><path d="M1 14c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="12" cy="5" r="2" fill="currentColor" opacity=".4"/><path d="M14 14c0-1.66-1.34-3-3-3" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+      <span class="nl">Anggota</span>
+    </div>
+    <div class="nav-item" data-page="lokasi">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M8 2C5.79 2 4 3.79 4 6c0 3.5 4 8 4 8s4-4.5 4-8c0-2.21-1.79-4-4-4z" fill="currentColor" opacity=".8"/><circle cx="8" cy="6" r="1.5" fill="white"/></svg>
+      <span class="nl">Lokasi</span>
+    </div>
+    <div class="sb-section">Konten</div>
+    <div class="nav-item" data-page="dokumentasi">
+      <svg viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5.5 6h5M5.5 9h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nl">Lampiran</span>
+    </div>
+    <div class="nav-item" data-page="galeri">
+      <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="5.5" cy="6.5" r="1" fill="currentColor" opacity=".6"/><path d="M2 11l3-3 3 3 2-2 4 4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+      <span class="nl">Galeri Foto</span>
+    </div>
+    <div class="sb-section nav-login-only" id="sbSectionKelola">Manajemen</div>
+    <div class="nav-item nav-login-only" data-page="kelola" id="navKelola">
+      <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="4" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 4V3a3 3 0 016 0v1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nl">Kelola Proker</span>
+    </div>
+    <div class="sb-spacer"></div>
+    <button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('collapsed')">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nl">Tutup Menu</span>
+    </button>
+  </nav>
+
+  <div id="dashMain">
+    <div class="topbar">
+      <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('collapsed')">
+        <span></span><span></span><span></span>
+      </button>
+      <div>
+        <div class="tb-title" id="tbTitle">Beranda</div>
+        <div class="tb-bc">KKN / <span id="tbBc">Beranda</span></div>
+      </div>
+      <div class="tb-right">
+        <div style="font-size:11px;color:#999" id="tbDate"></div>
+        <span class="guest-badge" id="guestBadge" style="display:none">&#128065; Mode Tamu</span>
+        <div style="text-align:right" id="userInfoBox">
+          <div style="font-size:13px;font-weight:600" id="tbName"></div>
+          <div style="font-size:11px;color:#aaa" id="tbRole"></div>
+        </div>
+        <div class="avatar" id="tbAv">?</div>
+        <button class="logout-btn" onclick="doLogout()">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M10 11l4-4-4-4M14 8H6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span id="logoutLabel">Keluar</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- BERANDA -->
+      <div class="page active" id="page-beranda">
+        <div class="page-hd"><h2>Selamat datang</h2><p id="wMsg">Ringkasan program kerja kelompok</p></div>
+        <div class="sum-grid">
+          <div class="sc"><div class="lb">Total</div><div class="vl" id="sTotal" style="color:#1a1a2e">0</div></div>
+          <div class="sc"><div class="lb">Belum</div><div class="vl" id="sBelum" style="color:#9e9e9e">0</div></div>
+          <div class="sc"><div class="lb">Proses</div><div class="vl" id="sProses" style="color:#f59e0b">0</div></div>
+          <div class="sc"><div class="lb">Selesai</div><div class="vl" id="sSelesai" style="color:#22c55e">0</div></div>
+        </div>
+        <div class="qcard-grid">
+          <div class="qcard" onclick="goPage('timeline')">
+            <div class="qcard-ic" style="background:#e8f0fe">
+              <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="2" rx="1" fill="#1a5db5" opacity=".6"/><rect x="2" y="7" width="9" height="2" rx="1" fill="#1a5db5"/><rect x="2" y="11" width="11" height="2" rx="1" fill="#1a5db5" opacity=".7"/></svg>
+            </div>
+            <div><div class="qcard-t">Timeline Proker</div><div class="qcard-s">Gantt Chart</div></div>
+          </div>
+          <div class="qcard" onclick="goPage('anggota')">
+            <div class="qcard-ic" style="background:#f0fdf4">
+              <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" fill="#166534" opacity=".7"/><path d="M1 14c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="#166534" stroke-width="1.5" fill="none"/></svg>
+            </div>
+            <div><div class="qcard-t">Anggota</div><div class="qcard-s">Profil tim</div></div>
+          </div>
+          <div class="qcard" onclick="goPage('dokumentasi')">
+            <div class="qcard-ic" style="background:#fdf4ff">
+              <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="2" stroke="#7e22ce" stroke-width="1.5" fill="none"/><path d="M5.5 6h5M5.5 9h3" stroke="#7e22ce" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+            <div><div class="qcard-t">Lampiran</div><div class="qcard-s">Laporan &amp; berkas</div></div>
+          </div>
+          <div class="qcard" onclick="goPage('galeri')">
+            <div class="qcard-ic" style="background:#fff7ed">
+              <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="#c2410c" stroke-width="1.5" fill="none"/><circle cx="5.5" cy="6.5" r="1" fill="#c2410c" opacity=".6"/><path d="M2 11l3-3 3 3 2-2 4 4" stroke="#c2410c" stroke-width="1.2" fill="none"/></svg>
+            </div>
+            <div><div class="qcard-t">Galeri Foto</div><div class="qcard-s">Foto kegiatan</div></div>
+          </div>
+        </div>
+        <div style="background:#fff;border-radius:11px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+          <div style="font-size:13px;font-weight:600;margin-bottom:12px">Proker Berjalan Hari Ini</div>
+          <div id="todayProker"></div>
+        </div>
+      </div>
+
+      <!-- TIMELINE -->
+      <div class="page" id="page-timeline">
+        <div class="page-hd"><h2>Timeline Program Kerja</h2><p id="tlSub">-</p></div>
+        <div class="ctrl">
+          <label style="font-size:12px;color:#555;font-weight:600">Filter:</label>
+          <button class="fbtn active" data-f="semua">Semua</button>
+          <button class="fbtn" data-f="Belum">Belum</button>
+          <button class="fbtn" data-f="Proses">Proses</button>
+          <button class="fbtn" data-f="Selesai">Selesai</button>
+          <select class="ssort" id="sortSel">
+            <option value="start">Tanggal Mulai</option>
+            <option value="end">Tanggal Selesai</option>
+            <option value="name">Nama</option>
+          </select>
+        </div>
+        <div class="gantt-wrap">
+          <div class="gantt-hdr" id="ganttHdr"></div>
+          <div id="ganttBody"></div>
+        </div>
+      </div>
+
+      <!-- ANGGOTA -->
+      <div class="page" id="page-anggota">
+        <div class="page-hd"><h2>Anggota Kelompok</h2><p>Profil dan informasi setiap anggota KKN</p></div>
+        <div class="mgrid" id="mgrid"></div>
+      </div>
+
+      <!-- LOKASI -->
+      <div class="page" id="page-lokasi">
+        <div class="page-hd"><h2>Lokasi KKN</h2><p>Wilayah penempatan dan informasi desa</p></div>
+        <iframe class="map-frame" src="https://maps.google.com/maps?q=-6.9175,107.6191&z=14&output=embed" allowfullscreen loading="lazy"></iframe>
+        <div class="linfo">
+          <div style="font-size:13px;font-weight:600;margin-bottom:12px">Detail Lokasi</div>
+          <div class="irow"><span class="k">Desa</span><span class="v">Desa Maju Sejahtera</span></div>
+          <div class="irow"><span class="k">Kecamatan</span><span class="v">Kec. Soreang</span></div>
+          <div class="irow"><span class="k">Kabupaten</span><span class="v">Kab. Bandung</span></div>
+          <div class="irow"><span class="k">Provinsi</span><span class="v">Jawa Barat</span></div>
+          <div class="irow"><span class="k">Dosen Pembimbing</span><span class="v">Dr. Ahmad Fauzi, M.Si.</span></div>
+          <div class="irow"><span class="k">Periode KKN</span><span class="v">Juli - Agustus 2025</span></div>
+        </div>
+      </div>
+
+      <!-- DOKUMENTASI -->
+      <div class="page" id="page-dokumentasi">
+        <div class="page-hd page-hd-row">
+          <div><h2>Dokumentasi</h2><p>Laporan, berita acara, dan dokumen kegiatan</p></div>
+          <button class="btn-add-content" id="btnAddDok" onclick="openDokModal()">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Tambah Dokumen
+          </button>
+        </div>
+        <div class="dgrid" id="dgrid"></div>
+      </div>
+
+      <!-- GALERI -->
+      <div class="page" id="page-galeri">
+        <div class="page-hd page-hd-row">
+          <div><h2>Galeri Foto</h2><p>Dokumentasi foto kegiatan program kerja</p></div>
+          <button class="btn-add-content" id="btnAddGaleri" onclick="openGaleriModal()">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Tambah Foto
+          </button>
+        </div>
+        <div class="ggrid" id="ggrid"></div>
+      </div>
+
+      <!-- KELOLA PROKER -->
+      <div class="page" id="page-kelola">
+        <div class="page-hd page-hd-row">
+          <div><h2>Kelola Program Kerja</h2><p>Tambah, edit, dan hapus data proker</p></div>
+          <button class="btn-add-proker" onclick="openProkerModal()">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Tambah Proker
+          </button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="proker-table">
+            <thead>
+              <tr>
+                <th>Nama Proker</th><th>Penanggung Jawab</th>
+                <th>Mulai</th><th>Selesai</th><th>Status</th><th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="kelolaBody">
+              <tr><td colspan="6" style="text-align:center;color:#bbb;padding:32px">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN PROMPT OVERLAY -->
+<div class="lp-overlay" id="lpOverlay" onclick="if(event.target===this)closeLp()">
+  <div class="lp-box">
+    <div class="lp-icon">&#128274;</div>
+    <h3>Fitur ini butuh akun</h3>
+    <p>Masuk atau daftar dulu untuk menggunakan fitur ini.</p>
+    <div class="lp-btns">
+      <button class="lp-btn-main" onclick="closeLp();showLogin()">Masuk / Daftar</button>
+      <button class="lp-btn-sec" onclick="closeLp()">Nanti saja</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PROKER -->
+<div class="modal-overlay" id="modalProker" onclick="if(event.target===this)closeProkerModal()">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <h3 id="prokerModalTitle">Tambah Proker</h3>
+      <button class="modal-close" onclick="closeProkerModal()">&#215;</button>
+    </div>
+    <div class="mfgroup">
+      <label>Nama Program Kerja</label>
+      <input type="text" id="fNama" placeholder="Nama program kerja"/>
+    </div>
+    <div class="mfgroup">
+      <label>Penanggung Jawab</label>
+      <select id="fPJ">
+        <option value="">-- Pilih Anggota --</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="mfgroup">
+        <label>Tanggal Mulai</label>
+        <input type="date" id="fMulai"/>
+      </div>
+      <div class="mfgroup">
+        <label>Tanggal Selesai</label>
+        <input type="date" id="fSelesai"/>
+      </div>
+    </div>
+    <div class="mfgroup">
+      <label>Status</label>
+      <select id="fStatus">
+        <option value="Belum">Belum</option>
+        <option value="Proses">Proses</option>
+        <option value="Selesai">Selesai</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="lp-btn-sec" onclick="closeProkerModal()">Batal</button>
+      <button class="lp-btn-main" id="btnSimpanProker" onclick="simpanProker()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DOKUMENTASI -->
+<div class="modal-overlay" id="modalDok" onclick="if(event.target===this)closeDokModal()">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <h3 id="dokModalTitle">Tambah Dokumen</h3>
+      <button class="modal-close" onclick="closeDokModal()">&#215;</button>
+    </div>
+    <div class="mfgroup">
+      <label>Judul Dokumen</label>
+      <input type="text" id="dJudul" placeholder="Contoh: Laporan Mingguan 3"/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="mfgroup">
+        <label>Tanggal</label>
+        <input type="date" id="dTgl"/>
+      </div>
+      <div class="mfgroup">
+        <label>Kategori</label>
+        <select id="dTag">
+          <option>Laporan</option><option>BA</option>
+          <option>Proposal</option><option>Surat</option><option>Lainnya</option>
+        </select>
+      </div>
+    </div>
+    <div class="mfgroup">
+      <label>Upload File (PDF / Excel, maks 5MB)</label>
+      <div class="upload-area" id="dokDropZone" onclick="document.getElementById('dokFileInput').click()"
+        ondragover="event.preventDefault();this.classList.add('dragover')"
+        ondragleave="this.classList.remove('dragover')"
+        ondrop="handleFileDrop(event,'dok')">
+        <input type="file" id="dokFileInput" accept=".pdf,.xlsx,.xls,.csv"
+          onchange="handleFileSelect(this,'dok')"/>
+        <div class="ua-icon">&#128196;</div>
+        <div class="ua-text">Klik atau drag file ke sini</div>
+        <div class="ua-hint">PDF, Excel (.xlsx, .xls), CSV · Maks 5MB</div>
+      </div>
+      <div class="file-chosen" id="dokFileChosen">
+        <span class="fc-icon" id="dokFileIcon">&#128196;</span>
+        <span class="fc-name" id="dokFileName"></span>
+        <span class="fc-size" id="dokFileSize"></span>
+        <button class="fc-remove" onclick="clearFile('dok')">&#215;</button>
+      </div>
+      <div class="upload-progress" id="dokProgress">
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="dokProgressBar" style="width:0%"></div></div>
+        <div class="progress-text" id="dokProgressText">Mengupload...</div>
+      </div>
+    </div>
+    <div class="mfgroup">
+      <label>Atau masukkan URL dokumen (Google Drive, dll)</label>
+      <input type="url" id="dUrl" placeholder="https://drive.google.com/..."/>
+    </div>
+    <div class="modal-footer">
+      <button class="lp-btn-sec" onclick="closeDokModal()">Batal</button>
+      <button class="lp-btn-main" id="btnSimpanDok" onclick="simpanDok()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GALERI -->
+<div class="modal-overlay" id="modalGaleri" onclick="if(event.target===this)closeGaleriModal()">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <h3 id="galeriModalTitle">Tambah Foto</h3>
+      <button class="modal-close" onclick="closeGaleriModal()">&#215;</button>
+    </div>
+    <div class="mfgroup">
+      <label>Caption / Judul Foto</label>
+      <input type="text" id="gCap" placeholder="Contoh: Sosialisasi Kesehatan Desa"/>
+    </div>
+    <div class="mfgroup">
+      <label>Upload Foto (JPG, JPEG, PNG, maks 5MB)</label>
+      <div class="upload-area" id="galeriDropZone" onclick="document.getElementById('galeriFileInput').click()"
+        ondragover="event.preventDefault();this.classList.add('dragover')"
+        ondragleave="this.classList.remove('dragover')"
+        ondrop="handleFileDrop(event,'galeri')">
+        <input type="file" id="galeriFileInput" accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+          onchange="handleFileSelect(this,'galeri')"/>
+        <div class="ua-icon">&#128247;</div>
+        <div class="ua-text">Klik atau drag foto ke sini</div>
+        <div class="ua-hint">JPG, JPEG, PNG · Maks 5MB</div>
+      </div>
+      <div class="file-chosen" id="galeriFileChosen">
+        <span class="fc-icon">&#128247;</span>
+        <span class="fc-name" id="galeriFileName"></span>
+        <span class="fc-size" id="galeriFileSize"></span>
+        <button class="fc-remove" onclick="clearFile('galeri')">&#215;</button>
+      </div>
+      <div class="img-preview" id="galeriPreview">
+        <img id="galeriPreviewImg" src="" alt="preview"/>
+      </div>
+      <div class="upload-progress" id="galeriProgress">
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="galeriProgressBar" style="width:0%"></div></div>
+        <div class="progress-text" id="galeriProgressText">Mengupload...</div>
+      </div>
+    </div>
+    <div class="mfgroup">
+      <label>Atau masukkan URL foto (Google Drive, Imgur, dll)</label>
+      <input type="url" id="gUrl" placeholder="https://..." oninput="previewUrl(this.value)"/>
+    </div>
+    <div class="modal-footer">
+      <button class="lp-btn-sec" onclick="closeGaleriModal()">Batal</button>
+      <button class="lp-btn-main" id="btnSimpanGaleri" onclick="simpanGaleri()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbywrqxq6W-TrRpukMWd2_bzSY6YpK70cVjDrzhD3ESxmD2mWseUaqiow9mkYeoBPg8Vog/exec';
+
+function gasGet(action){
+  return fetch(GAS_URL+'?action='+action).then(function(r){return r.json();});
+}
+function gasPost(body){
+  return fetch(GAS_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  }).then(function(r){return r.json();});
+}
+
+var currentUser  = null;
+var isGuest      = false;
+var prokerData   = [];
+var dokItems     = [];
+var galeriItems  = [];
+var activeFilter = 'semua';
+var _editProkerIdx = null;
+var _editDokIdx    = null;
+var _editGaleriIdx = null;
+var _dokFileData   = null;   // {base64, mimeType, name}
+var _galeriFileData= null;
+var _lupaEmail     = '';
+var _resetToken    = null;
+
+// ════════════════════════════════════════════════
+//  STATIC DATA
+// ════════════════════════════════════════════════
+var ANGGOTA=[
+  {nama:'Ahmad Rifai',   nim:'20210001',prodi:'Teknik Informatika',peran:'Ketua',     warna:'#0f3460'},
+  {nama:'Budi Santoso',  nim:'20210042',prodi:'Ilmu Komunikasi',   peran:'Sekretaris',warna:'#166534'},
+  {nama:'Citra Dewi',    nim:'20210087',prodi:'Pend. Biologi',     peran:'Bendahara', warna:'#7e22ce'},
+  {nama:'Dodi Pratama',  nim:'20210123',prodi:'Hukum',             peran:'Anggota',   warna:'#b45309'},
+  {nama:'Eka Sari',      nim:'20210156',prodi:'Ekonomi',           peran:'Anggota',   warna:'#c2410c'},
+  {nama:'Fajar Nugroho', nim:'20210178',prodi:'Teknik Sipil',      peran:'Anggota',   warna:'#0369a1'},
+  {nama:'Gita Lestari',  nim:'20210203',prodi:'Psikologi',         peran:'Anggota',   warna:'#be185d'},
+  {nama:'Hendra Wijaya', nim:'20210234',prodi:'Pertanian',         peran:'Anggota',   warna:'#065f46'},
+];
+var DOK_DEFAULT=[
+  {id:'d1',judul:'Laporan Mingguan 1',tgl:'5 Jul 2025', tag:'Laporan',ic:'📄',bg:'#e8f0fe',url:''},
+  {id:'d2',judul:'Berita Acara Rapat',tgl:'8 Jul 2025', tag:'BA',     ic:'📋',bg:'#f0fdf4',url:''},
+  {id:'d3',judul:'Proposal Proker',   tgl:'1 Jul 2025', tag:'Proposal',ic:'📑',bg:'#fdf4ff',url:''},
+];
+var GALERI_DEFAULT=[
+  {id:'g1',cap:'Sosialisasi Kesehatan',ic:'🏥',bg:'#fee2e2',url:''},
+  {id:'g2',cap:'Pelatihan UMKM',       ic:'💼',bg:'#fef3c7',url:''},
+  {id:'g3',cap:'Bersih Desa',          ic:'🌿',bg:'#dcfce7',url:''},
+];
+
+// ════════════════════════════════════════════════
+//  VIEW SWITCHING
+// ════════════════════════════════════════════════
+function showDashboard(){
+  document.getElementById('viewLogin').style.display    ='none';
+  document.getElementById('viewDashboard').style.display='flex';
+}
+function showLogin(){
+  document.getElementById('viewDashboard').style.display='none';
+  document.getElementById('viewLogin').style.display    ='flex';
+}
+
+// ════════════════════════════════════════════════
+//  TAB SWITCHING (login form)
+// ════════════════════════════════════════════════
+function switchTab(tab){
+  clearAlert();
+  var panes=['paneMasuk','paneDaftar','paneLupa','paneReset'];
+  panes.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.style.display='none';
+  });
+  var showTabs=(tab==='masuk'||tab==='daftar');
+  document.getElementById('tabBar').style.display=showTabs?'flex':'none';
+  var map={masuk:'paneMasuk',daftar:'paneDaftar',lupa:'paneLupa',reset:'paneReset'};
+  var target=document.getElementById(map[tab]);
+  if(target) target.style.display='block';
+  document.getElementById('tabMasuk').className ='tab-btn'+(tab==='masuk' ?' active':'');
+  document.getElementById('tabDaftar').className='tab-btn'+(tab==='daftar'?' active':'');
+  if(tab==='lupa') resetLupaStep();
+}
+function resetLupaStep(){
+  document.getElementById('lupaStep1').style.display='block';
+  document.getElementById('lupaStep2').style.display='none';
+  document.getElementById('lupaEmail').value='';
+}
+
+// ════════════════════════════════════════════════
+//  ALERT
+// ════════════════════════════════════════════════
+function showAlert(msg,type){
+  var box=document.getElementById('alertBox');
+  var ico=document.getElementById('alertIco');
+  box.className='alert '+(type==='ok'?'alert-success':'alert-error');
+  ico.innerHTML=type==='ok'
+    ?'<path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+    :'<circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 5v3.5M8 10.5v.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>';
+  document.getElementById('alertTxt').textContent=msg;
+}
+function clearAlert(){document.getElementById('alertBox').className='alert hidden';}
+
+// ════════════════════════════════════════════════
+//  FORM HELPERS
+// ════════════════════════════════════════════════
+function tglPw(id,btn){
+  var el=document.getElementById(id);
+  el.type=el.type==='password'?'text':'password';
+  btn.innerHTML=el.type==='text'
+    ?'<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 2l12 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M6.5 6.7A2 2 0 009.3 9.5M4 4.2C2.7 5.2 1.5 8 1.5 8s3 5 6.5 5c1.2 0 2.4-.4 3.3-1.1M6.3 3.1C6.9 3 7.4 3 8 3c3.5 0 6.5 5 6.5 5s-.7 1.4-2 2.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'
+    :'<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 3C4.5 3 1.5 8 1.5 8s3 5 6.5 5 6.5-5 6.5-5S11.5 3 8 3z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/></svg>';
+}
+function pwStrength(pw){
+  var bars=[document.getElementById('pb1'),document.getElementById('pb2'),document.getElementById('pb3')];
+  var hint=document.getElementById('pwHint');
+  bars.forEach(function(b){b.className='pw-bar';});
+  if(!pw){hint.textContent='';return;}
+  var s=0;
+  if(pw.length>=6)s++;
+  if(pw.length>=10)s++;
+  if(/[A-Z]/.test(pw)&&/[0-9]/.test(pw))s++;
+  var cls=['w','m','s'][s-1]||'w';
+  var label=['Lemah','Sedang','Kuat'][s-1]||'Lemah';
+  for(var i=0;i<s;i++) bars[i].classList.add(cls);
+  hint.textContent='Kekuatan: '+label;
+  hint.style.color={w:'#e94560',m:'#f59e0b',s:'#22c55e'}[cls];
+}
+function setBusy(btnId,lblId,busy,txt){
+  document.getElementById(btnId).disabled=busy;
+  document.getElementById(lblId).innerHTML=busy?'<div class="spinner"></div>':txt;
+}
+function otpNext(el,nextId){
+  el.value=el.value.replace(/[^0-9]/g,'');
+  if(el.value&&nextId) document.getElementById(nextId).focus();
+}
+function getOtp(){
+  return ['otp1','otp2','otp3','otp4','otp5','otp6']
+    .map(function(id){return document.getElementById(id).value;}).join('');
+}
+
+// ════════════════════════════════════════════════
+//  AUTH FUNCTIONS
+// ════════════════════════════════════════════════
+function doLogin(){
+  clearAlert();
+  var user=document.getElementById('inUser').value.trim();
+  var pw=document.getElementById('inPw').value;
+  if(!user||!pw){showAlert('Username dan password wajib diisi.','err');return;}
+  setBusy('btnMasuk','lblMasuk',true,'Masuk');
+  gasPost({action:'login', username:user, password:pw})
+  .then(function(res){
+    setBusy('btnMasuk','lblMasuk',false,'Masuk');
+    if(!res.success){showAlert(res.message,'err');return;}
+    currentUser=res.user;
+    isGuest=false;
+    setupDashboard(res.user);
+    showDashboard();
+    loadAllData();
+  })
+  .catch(function(err){
+    setBusy('btnMasuk','lblMasuk',false,'Masuk');
+    showAlert('Gagal terhubung: '+(err.message||err),'err');
+  });
+}
+
+function doGuestLogin(){
+  isGuest=true;
+  currentUser=null;
+  setupDashboard(null);
+  showDashboard();
+  loadAllData();
+}
+
+function doDaftar(){
+  clearAlert();
+  var nama=document.getElementById('rNama').value.trim();
+  var user=document.getElementById('rUser').value.trim();
+  var email=document.getElementById('rEmail').value.trim().toLowerCase();
+  var pw=document.getElementById('rPw').value;
+  var kode=document.getElementById('rKode').value.trim();
+  if(!nama||!user||!email||!pw||!kode){showAlert('Semua field wajib diisi.','err');return;}
+  if(user.length<3){showAlert('Username minimal 3 karakter.','err');return;}
+  if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){showAlert('Format email tidak valid.','err');return;}
+  if(pw.length<6){showAlert('Password minimal 6 karakter.','err');return;}
+  setBusy('btnDaftar','lblDaftar',true,'Buat Akun');
+  gasPost({action:'register', username:user, nama:nama,
+         email:email, password:pw, authCode:kode})
+  .then(function(res){
+    setBusy('btnDaftar','lblDaftar',false,'Buat Akun');
+    showAlert(res.message,res.success?'ok':'err');
+    if(res.success){
+      setTimeout(function(){
+        switchTab('masuk');
+        document.getElementById('inUser').value=user;
+        document.getElementById('inPw').focus();
+      },1400);
+    }
+  })
+  .catch(function(err){
+    setBusy('btnDaftar','lblDaftar',false,'Buat Akun');
+    showAlert('Gagal terhubung: '+(err.message||err),'err');
+  });
+}
+
+function doLupaPassword(){
+  clearAlert();
+  var email=document.getElementById('lupaEmail').value.trim().toLowerCase();
+  if(!email){showAlert('Masukkan email kamu.','err');return;}
+  if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){showAlert('Format email tidak valid.','err');return;}
+  setBusy('btnLupa','lblLupa',true,'Kirim Kode OTP');
+  gasPost({action:'requestReset', email:email})
+  .then(function(res){
+    setBusy('btnLupa','lblLupa',false,'Kirim Kode OTP');
+    if(res.success){
+      _lupaEmail=email;
+      document.getElementById('lupaStep1').style.display='none';
+      document.getElementById('lupaStep2').style.display='block';
+      document.getElementById('sentToEmail').textContent=email;
+      document.getElementById('otp1').focus();
+    } else {
+      showAlert(res.message,'err');
+    }
+  })
+  .catch(function(err){
+    setBusy('btnLupa','lblLupa',false,'Kirim Kode OTP');
+    showAlert('Gagal terhubung: '+(err.message||err),'err');
+  });
+}
+
+function doVerifyOtp(){
+  clearAlert();
+  var otp=getOtp();
+  if(otp.length<6){showAlert('Masukkan 6 digit kode verifikasi.','err');return;}
+  if(!_lupaEmail){showAlert('Session berakhir. Ulangi dari awal.','err');return;}
+  setBusy('btnOtp','lblOtp',true,'Verifikasi Kode');
+  gasPost({action:'verifyOtp', email:_lupaEmail, otp:otp})
+  .then(function(res){
+    setBusy('btnOtp','lblOtp',false,'Verifikasi Kode');
+    if(res.success){
+      _resetToken=res.token;
+      switchTab('reset');
+    } else {
+      showAlert(res.message,'err');
+    }
+  })
+  .catch(function(err){
+    setBusy('btnOtp','lblOtp',false,'Verifikasi Kode');
+    showAlert('Gagal: '+(err.message||err),'err');
+  });
+}
+
+function doResetPassword(){
+  clearAlert();
+  var pw1=document.getElementById('newPw1').value;
+  var pw2=document.getElementById('newPw2').value;
+  if(!pw1||!pw2){showAlert('Kedua field wajib diisi.','err');return;}
+  if(pw1.length<6){showAlert('Password minimal 6 karakter.','err');return;}
+  if(pw1!==pw2){showAlert('Password tidak cocok.','err');return;}
+  if(!_resetToken){showAlert('Token tidak valid.','err');return;}
+  setBusy('btnReset','lblReset',true,'Simpan Password Baru');
+  gasPost({action:'resetPassword', token:_resetToken, password:pw1})
+  .then(function(res){
+    setBusy('btnReset','lblReset',false,'Simpan Password Baru');
+    showAlert(res.message,res.success?'ok':'err');
+    if(res.success){
+      _resetToken=null;
+      setTimeout(function(){switchTab('masuk');},1800);
+    }
+  })
+  .catch(function(err){
+    setBusy('btnReset','lblReset',false,'Simpan Password Baru');
+    showAlert('Gagal: '+(err.message||err),'err');
+  });
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter'||currentUser||isGuest) return;
+  var pm=document.getElementById('paneMasuk');
+  var pd=document.getElementById('paneDaftar');
+  var pl=document.getElementById('paneLupa');
+  if(pm&&pm.style.display!=='none'){doLogin();return;}
+  if(pd&&pd.style.display!=='none'){doDaftar();return;}
+  if(pl&&pl.style.display!=='none'){
+    var s2=document.getElementById('lupaStep2');
+    if(s2&&s2.style.display!=='none') doVerifyOtp();
+    else doLupaPassword();
+  }
+});
+
+// ════════════════════════════════════════════════
+//  DASHBOARD SETUP
+// ════════════════════════════════════════════════
+function setupDashboard(user){
+  var guest=!user;
+  document.getElementById('tbDate').textContent=
+    new Date().toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+
+  if(guest){
+    document.getElementById('tbAv').textContent='👁';
+    document.getElementById('tbAv').style.background='#64748b';
+    document.getElementById('tbName').textContent='';
+    document.getElementById('tbRole').textContent='';
+    document.getElementById('sbHello').textContent='Mode Tamu';
+    document.getElementById('wMsg').textContent='Anda masuk sebagai tamu. Beberapa fitur memerlukan login.';
+    document.getElementById('guestBadge').style.display='inline-flex';
+    document.getElementById('userInfoBox').style.display='none';
+    document.getElementById('logoutLabel').textContent='Keluar';
+    document.getElementById('sbSectionKelola').style.display='none';
+    document.getElementById('navKelola').style.display='none';
+    document.getElementById('btnAddDok').style.display='none';
+    document.getElementById('btnAddGaleri').style.display='none';
+  } else {
+    var ini=user.nama.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+    document.getElementById('tbAv').textContent=ini;
+    document.getElementById('tbAv').style.background='#0f3460';
+    document.getElementById('tbName').textContent=user.nama;
+    document.getElementById('tbRole').textContent=user.role==='admin'?'Admin':'Anggota';
+    document.getElementById('sbHello').textContent='Halo, '+user.nama.split(' ')[0];
+    document.getElementById('wMsg').textContent='Halo '+user.nama+'! Berikut ringkasan proker.';
+    document.getElementById('guestBadge').style.display='none';
+    document.getElementById('userInfoBox').style.display='block';
+    document.getElementById('logoutLabel').textContent='Keluar';
+    document.getElementById('sbSectionKelola').style.display='block';
+    document.getElementById('navKelola').style.display='flex';
+    document.getElementById('btnAddDok').style.display='inline-flex';
+    document.getElementById('btnAddGaleri').style.display='inline-flex';
+  }
+
+  // Isi dropdown PJ dari data anggota
+  var selPJ=document.getElementById('fPJ');
+  selPJ.innerHTML='<option value="">-- Pilih Anggota --</option>';
+  ANGGOTA.forEach(function(a){
+    var opt=document.createElement('option');
+    opt.value=a.nama; opt.textContent=a.nama+' ('+a.prodi+')';
+    selPJ.appendChild(opt);
+  });
+
+  // Nav listeners
+  document.querySelectorAll('.nav-item').forEach(function(n){
+    n.onclick=function(){
+      if(guest&&n.dataset.page==='kelola'){showLp();return;}
+      goPage(n.dataset.page);
+    };
+  });
+  document.querySelectorAll('.fbtn').forEach(function(b){
+    b.onclick=function(){
+      document.querySelectorAll('.fbtn').forEach(function(x){x.classList.remove('active');});
+      b.classList.add('active');
+      activeFilter=b.dataset.f;
+      renderGantt();
+    };
+  });
+  document.getElementById('sortSel').onchange=renderGantt;
+
+  // Init data konten dari default
+  dokItems=DOK_DEFAULT.slice();
+  galeriItems=GALERI_DEFAULT.slice();
+  renderAnggota();
+  renderDokumen();
+  renderGaleri();
+}
+
+function loadAllData(){
+  gasGet('getSheetData')
+    .then(function(rows){loadProker(rows||[]);})
+    .catch(function(){loadProker([]);});
+  gasGet('getDokData')
+    .then(function(data){if(data&&data.length){dokItems=data;renderDokumen();}})
+    .catch(function(){});
+  gasGet('getGaleriData')
+    .then(function(data){if(data&&data.length){galeriItems=data;renderGaleri();}})
+    .catch(function(){});
+}
+
+function doLogout(){
+  var label=isGuest?'Yakin ingin keluar dari mode tamu?':'Yakin ingin keluar?';
+  if(!confirm(label)) return;
+  currentUser=null; isGuest=false; prokerData=[];
+  _editProkerIdx=null; _editDokIdx=null; _editGaleriIdx=null;
+  document.getElementById('inUser').value='';
+  document.getElementById('inPw').value='';
+  clearAlert();
+  showLogin();
+  switchTab('masuk');
+  goPage('beranda');
+}
+
+// ════════════════════════════════════════════════
+//  PROKER / GANTT
+// ════════════════════════════════════════════════
+function loadProker(rows){
+  prokerData=rows.map(function(r){
+    return{nama:r[0]||'',pj:r[1]||'',mulai:pd(r[2]),selesai:pd(r[3]),status:ns(r[4]||'')};
+  }).filter(function(d){return d.mulai&&d.selesai;});
+  document.getElementById('sTotal').textContent=prokerData.length;
+  document.getElementById('sBelum').textContent=prokerData.filter(function(d){return d.status==='Belum';}).length;
+  document.getElementById('sProses').textContent=prokerData.filter(function(d){return d.status==='Proses';}).length;
+  document.getElementById('sSelesai').textContent=prokerData.filter(function(d){return d.status==='Selesai';}).length;
+  document.getElementById('tlSub').textContent=prokerData.length+' program kerja';
+  renderTodayProker(); renderGantt();
+}
+function pd(v){if(!v)return null;if(v instanceof Date)return v;var d=new Date(v);return isNaN(d)?null:d;}
+function ns(s){s=s.toLowerCase().trim();if(s.includes('selesai'))return'Selesai';if(s.includes('proses')||s.includes('berjalan'))return'Proses';return'Belum';}
+
+function renderTodayProker(){
+  var today=new Date();today.setHours(0,0,0,0);
+  var run=prokerData.filter(function(d){
+    var a=new Date(d.mulai);a.setHours(0,0,0,0);
+    var b=new Date(d.selesai);b.setHours(0,0,0,0);
+    return today>=a&&today<=b;
+  });
+  var el=document.getElementById('todayProker');
+  if(!run.length){el.innerHTML='<p style="color:#bbb;font-size:13px">Tidak ada proker yang berjalan hari ini.</p>';return;}
+  var html='';
+  run.forEach(function(d){
+    var div=document.createElement('div');
+    div.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f6f6f6';
+    var span1=document.createElement('span');
+    span1.className='badge b'+d.status.toLowerCase()[0];
+    span1.textContent=d.status;
+    var span2=document.createElement('span');
+    span2.style.cssText='font-size:13px;font-weight:600';
+    span2.textContent=d.nama;
+    var span3=document.createElement('span');
+    span3.style.cssText='font-size:12px;color:#aaa';
+    span3.textContent=d.pj;
+    div.appendChild(span1);div.appendChild(span2);div.appendChild(span3);
+    el.appendChild(div);
+    html+=div.outerHTML;
+  });
+  el.innerHTML=html;
+}
+
+function renderGantt(){
+  var sv=document.getElementById('sortSel').value;
+  var data=prokerData.filter(function(d){return activeFilter==='semua'||d.status===activeFilter;});
+  data.sort(function(a,b){
+    if(sv==='end') return a.selesai-b.selesai;
+    if(sv==='name') return a.nama.localeCompare(b.nama);
+    return a.mulai-b.mulai;
+  });
+  if(!data.length){
+    document.getElementById('ganttHdr').innerHTML='';
+    document.getElementById('ganttBody').textContent='Tidak ada data.';
+    return;
+  }
+  var minD=new Date(Math.min.apply(null,data.map(function(d){return d.mulai.getTime();}))); minD.setHours(0,0,0,0);
+  var maxD=new Date(Math.max.apply(null,data.map(function(d){return d.selesai.getTime();}))); maxD.setHours(0,0,0,0);
+  var today=new Date();today.setHours(0,0,0,0);
+  var td=dB(minD,maxD)+1, CW=Math.max(24,Math.floor(520/td));
+
+  // Header
+  var hdrEl=document.getElementById('ganttHdr');
+  hdrEl.innerHTML='';
+  for(var i=0;i<=td;i++){
+    var dd=aD(minD,i);
+    var lbl=document.createElement('div');
+    lbl.className='dlbl'; lbl.style.width=CW+'px';
+    if(i%7===0||dd.getDate()===1) lbl.textContent=dd.getDate()+'/'+(dd.getMonth()+1);
+    hdrEl.appendChild(lbl);
+  }
+
+  var tOff=today>=minD&&today<=maxD?dB(minD,today)*CW:-1;
+  var tW=(td+1)*CW;
+  var bodyEl=document.getElementById('ganttBody');
+  bodyEl.innerHTML='';
+
+  data.forEach(function(d){
+    var st=dB(minD,d.mulai),dur=dB(d.mulai,d.selesai)+1,lx=st*CW,wx=dur*CW,sk=d.status.toLowerCase();
+    var prog=0;
+    if(d.status==='Selesai') prog=100;
+    else if(d.status==='Proses'){var elapsed=Math.max(0,dB(d.mulai,today));prog=Math.min(100,Math.round(elapsed/dur*100));}
+    var isToday=today>=d.mulai&&today<=d.selesai;
+
+    var row=document.createElement('div');
+    row.className='grow'+(isToday?' thl':'');
+
+    var info=document.createElement('div');
+    info.className='rinfo';
+    var pn=document.createElement('div');pn.className='pname';pn.title=d.nama;pn.textContent=d.nama;
+    var ps=document.createElement('div');ps.className='psub';ps.textContent=d.pj;
+    var bg=document.createElement('span');bg.className='badge b'+sk[0];bg.textContent=d.status;
+    info.appendChild(pn);info.appendChild(ps);info.appendChild(bg);
+
+    var chart=document.createElement('div');
+    chart.className='rchart';chart.style.width=tW+'px';chart.style.minWidth=tW+'px';
+
+    var glines=document.createElement('div');glines.className='glines';
+    for(var i=0;i<=td;i++){
+      var gl=document.createElement('div');gl.className='gl';gl.style.width=CW+'px';glines.appendChild(gl);
+    }
+    chart.appendChild(glines);
+
+    if(tOff>=0){
+      var tl=document.createElement('div');tl.className='tdline';tl.style.left=tOff+'px';chart.appendChild(tl);
+    }
+
+    var bar=document.createElement('div');
+    bar.className='bar '+sk;bar.style.left=lx+'px';bar.style.width=wx+'px';
+    bar.title=fmtD(d.mulai)+' - '+fmtD(d.selesai);
+    var bp=document.createElement('div');bp.className='bprog';bp.style.width=prog+'%';
+    var bl=document.createElement('div');bl.className='blbl';bl.textContent=prog+'%';
+    bar.appendChild(bp);bar.appendChild(bl);
+    chart.appendChild(bar);
+
+    row.appendChild(info);row.appendChild(chart);
+    bodyEl.appendChild(row);
+  });
+}
+
+// ════════════════════════════════════════════════
+//  ANGGOTA
+// ════════════════════════════════════════════════
+function renderAnggota(){
+  var grid=document.getElementById('mgrid');
+  grid.innerHTML='';
+  ANGGOTA.forEach(function(a){
+    var ini=a.nama.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+    var card=document.createElement('div');card.className='mcard';
+    var av=document.createElement('div');av.className='avlg';av.style.background=a.warna;av.textContent=ini;
+    var mn=document.createElement('div');mn.className='mn';mn.textContent=a.nama;
+    var mr=document.createElement('div');mr.className='mr';mr.textContent=a.peran;
+    var mp=document.createElement('div');mp.className='mni';mp.textContent=a.prodi;
+    var mn2=document.createElement('div');mn2.className='mni';mn2.textContent='NIM: '+a.nim;
+    card.appendChild(av);card.appendChild(mn);card.appendChild(mr);card.appendChild(mp);card.appendChild(mn2);
+    grid.appendChild(card);
+  });
+}
+
+// ════════════════════════════════════════════════
+//  DOKUMENTASI
+// ════════════════════════════════════════════════
+function renderDokumen(){
+  var grid=document.getElementById('dgrid');
+  grid.innerHTML='';
+  var canEdit=!isGuest&&currentUser;
+  dokItems.forEach(function(d,i){
+    var card=document.createElement('div');card.className='dcard';
+    if(canEdit){
+      var acts=document.createElement('div');acts.className='card-actions';
+      var be=document.createElement('button');be.className='ca-btn ca-edit';be.textContent='Edit';
+      be.onclick=function(){openDokModal(i);};
+      var bd=document.createElement('button');bd.className='ca-btn ca-del';bd.textContent='Hapus';
+      bd.onclick=function(){hapusDok(i);};
+      acts.appendChild(be);acts.appendChild(bd);card.appendChild(acts);
+    }
+    var thumb=document.createElement('div');thumb.className='dthumb';thumb.style.background=d.bg;
+    var ico=document.createElement('span');ico.style.fontSize='34px';ico.textContent=d.ic;
+    thumb.appendChild(ico);
+    var body=document.createElement('div');body.className='dbody';
+    var tl=document.createElement('div');tl.className='dtitle';tl.textContent=d.judul;
+    var tm=document.createElement('div');tm.className='dmeta';tm.textContent=d.tgl;
+    var tg=document.createElement('span');tg.className='dtag';tg.textContent=d.tag;
+    body.appendChild(tl);body.appendChild(tm);body.appendChild(tg);
+    if(d.url){
+      var lk=document.createElement('a');lk.className='dok-link';lk.href=d.url;
+      lk.target='_blank';lk.rel='noopener';lk.textContent='Buka dokumen';
+      body.appendChild(lk);
+    }
+    card.appendChild(thumb);card.appendChild(body);
+    grid.appendChild(card);
+  });
+}
+
+function openDokModal(idx){
+  _editDokIdx=(idx!==undefined)?idx:null;
+  document.getElementById('dokModalTitle').textContent=_editDokIdx!==null?'Edit Dokumen':'Tambah Dokumen';
+  document.getElementById('btnSimpanDok').textContent=_editDokIdx!==null?'Simpan Perubahan':'Simpan';
+  document.getElementById('dJudul').value='';
+  document.getElementById('dTgl').value='';
+  document.getElementById('dTag').value='Laporan';
+  document.getElementById('dUrl').value='';
+  clearFile('dok');
+  if(_editDokIdx!==null){
+    var d=dokItems[_editDokIdx];
+    document.getElementById('dJudul').value=d.judul;
+    document.getElementById('dTag').value=d.tag;
+    document.getElementById('dUrl').value=d.url||'';
+  }
+  document.getElementById('modalDok').classList.add('show');
+  document.getElementById('dJudul').focus();
+}
+function closeDokModal(){
+  document.getElementById('modalDok').classList.remove('show');
+  _dokFileData=null;
+}
+
+function simpanDok(){
+  var judul=document.getElementById('dJudul').value.trim();
+  var tgl=document.getElementById('dTgl').value;
+  var tag=document.getElementById('dTag').value;
+  var url=document.getElementById('dUrl').value.trim();
+  if(!judul){alert('Judul dokumen wajib diisi.');return;}
+  if(!_dokFileData&&!url){alert('Upload file atau masukkan URL dokumen.');return;}
+
+  var btn=document.getElementById('btnSimpanDok');
+  btn.disabled=true;btn.textContent='Menyimpan...';
+
+  var tglFmt=tgl?new Date(tgl).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}):'-';
+  var bgMap={Laporan:'#e8f0fe',BA:'#f0fdf4',Proposal:'#fdf4ff',Surat:'#fff7ed',Lainnya:'#f1f5f9'};
+
+  if(_dokFileData){
+    // Upload ke Drive
+    showProgress('dok',0,'Mengupload file...');
+    google.script.run
+      .withSuccessHandler(function(res){
+        btn.disabled=false;btn.textContent=_editDokIdx!==null?'Simpan Perubahan':'Simpan';
+        hideProgress('dok');
+        if(res.success){
+          saveDokItem({
+            judul:judul,tgl:tglFmt,tag:tag,ic:getDocIcon(tag),
+            bg:bgMap[tag]||'#e8f0fe',url:res.viewUrl,id:res.fileId||('d'+Date.now())
+          });
+          closeDokModal();renderDokumen();
+        } else {alert('Gagal upload: '+res.message);}
+      })
+      .withFailureHandler(function(err){
+        btn.disabled=false;hideProgress('dok');
+        alert('Error: '+err.message);
+      })
+      .uploadFileToDrive(_dokFileData.base64,_dokFileData.name,_dokFileData.mimeType,'Dokumentasi KKN');
+  } else {
+    saveDokItem({
+      judul:judul,tgl:tglFmt,tag:tag,ic:getDocIcon(tag),
+      bg:bgMap[tag]||'#e8f0fe',url:url,id:'d'+Date.now()
+    });
+    btn.disabled=false;
+    closeDokModal();renderDokumen();
+  }
+}
+
+function saveDokItem(item){
+  if(_editDokIdx!==null) dokItems[_editDokIdx]=item;
+  else dokItems.push(item);
+}
+
+function hapusDok(idx){
+  if(!confirm('Hapus dokumen "'+dokItems[idx].judul+'"?')) return;
+  dokItems.splice(idx,1);
+  renderDokumen();
+}
+
+function getDocIcon(tag){
+  var m={Laporan:'📄',BA:'📋',Proposal:'📑',Surat:'✉️',Lainnya:'📎'};
+  return m[tag]||'📄';
+}
+
+// ════════════════════════════════════════════════
+//  GALERI FOTO
+// ════════════════════════════════════════════════
+function renderGaleri(){
+  var grid=document.getElementById('ggrid');
+  grid.innerHTML='';
+  var canEdit=!isGuest&&currentUser;
+  galeriItems.forEach(function(g,i){
+    var item=document.createElement('div');item.className='gitem';
+    if(canEdit){
+      var acts=document.createElement('div');acts.className='card-actions';
+      var be=document.createElement('button');be.className='ca-btn ca-edit';be.textContent='Edit';
+      be.onclick=function(){openGaleriModal(i);};
+      var bd=document.createElement('button');bd.className='ca-btn ca-del';bd.textContent='Hapus';
+      bd.onclick=function(){hapusGaleri(i);};
+      acts.appendChild(be);acts.appendChild(bd);item.appendChild(acts);
+    }
+    var thumb=document.createElement('div');thumb.className='gthumb';thumb.style.background=g.bg;
+    if(g.url){
+      var img=document.createElement('img');img.src=g.url;img.alt=g.cap;
+      img.onerror=function(){
+        this.style.display='none';
+        var ico=document.createElement('span');ico.style.fontSize='30px';ico.textContent=g.ic;
+        thumb.style.display='flex';thumb.style.alignItems='center';thumb.style.justifyContent='center';
+        thumb.appendChild(ico);
+      };
+      thumb.appendChild(img);
+    } else {
+      var ic=document.createElement('div');ic.className='gthumb-icon';
+      var sp=document.createElement('span');sp.style.fontSize='30px';sp.textContent=g.ic;
+      ic.appendChild(sp);thumb.appendChild(ic);
+    }
+    var cap=document.createElement('div');cap.className='gcap';cap.textContent=g.cap;
+    item.appendChild(thumb);item.appendChild(cap);
+    grid.appendChild(item);
+  });
+}
+
+function openGaleriModal(idx){
+  _editGaleriIdx=(idx!==undefined)?idx:null;
+  document.getElementById('galeriModalTitle').textContent=_editGaleriIdx!==null?'Edit Foto':'Tambah Foto';
+  document.getElementById('btnSimpanGaleri').textContent=_editGaleriIdx!==null?'Simpan Perubahan':'Simpan';
+  document.getElementById('gCap').value='';
+  document.getElementById('gUrl').value='';
+  document.getElementById('galeriPreview').style.display='none';
+  clearFile('galeri');
+  if(_editGaleriIdx!==null){
+    var g=galeriItems[_editGaleriIdx];
+    document.getElementById('gCap').value=g.cap;
+    document.getElementById('gUrl').value=g.url||'';
+    if(g.url) previewUrl(g.url);
+  }
+  document.getElementById('modalGaleri').classList.add('show');
+  document.getElementById('gCap').focus();
+}
+function closeGaleriModal(){
+  document.getElementById('modalGaleri').classList.remove('show');
+  _galeriFileData=null;
+}
+
+function previewUrl(url){
+  var box=document.getElementById('galeriPreview');
+  if(url&&url.startsWith('http')){
+    document.getElementById('galeriPreviewImg').src=url;
+    box.style.display='block';
+  } else {
+    box.style.display='none';
+  }
+}
+
+function simpanGaleri(){
+  var cap=document.getElementById('gCap').value.trim();
+  var url=document.getElementById('gUrl').value.trim();
+  if(!cap){alert('Caption foto wajib diisi.');return;}
+  if(!_galeriFileData&&!url){alert('Upload foto atau masukkan URL gambar.');return;}
+
+  var btn=document.getElementById('btnSimpanGaleri');
+  btn.disabled=true;btn.textContent='Menyimpan...';
+
+  if(_galeriFileData){
+    showProgress('galeri',0,'Mengupload foto...');
+    google.script.run
+      .withSuccessHandler(function(res){
+        btn.disabled=false;hideProgress('galeri');
+        if(res.success){
+          saveGaleriItem({id:res.fileId||('g'+Date.now()),cap:cap,ic:'📷',bg:'#dbeafe',url:res.viewUrl});
+          closeGaleriModal();renderGaleri();
+        } else {alert('Gagal upload: '+res.message);}
+      })
+      .withFailureHandler(function(err){
+        btn.disabled=false;hideProgress('galeri');
+        alert('Error: '+err.message);
+      })
+      .uploadFileToDrive(_galeriFileData.base64,_galeriFileData.name,_galeriFileData.mimeType,'Galeri KKN');
+  } else {
+    saveGaleriItem({id:'g'+Date.now(),cap:cap,ic:'📷',bg:'#dbeafe',url:url});
+    btn.disabled=false;
+    closeGaleriModal();renderGaleri();
+  }
+}
+
+function saveGaleriItem(item){
+  if(_editGaleriIdx!==null) galeriItems[_editGaleriIdx]=item;
+  else galeriItems.push(item);
+}
+
+function hapusGaleri(idx){
+  if(!confirm('Hapus foto "'+galeriItems[idx].cap+'"?')) return;
+  galeriItems.splice(idx,1);renderGaleri();
+}
+
+// ════════════════════════════════════════════════
+//  FILE UPLOAD HANDLER
+// ════════════════════════════════════════════════
+function handleFileSelect(input,type){
+  if(!input.files||!input.files[0]) return;
+  processFile(input.files[0],type);
+}
+function handleFileDrop(e,type){
+  e.preventDefault();
+  document.getElementById(type==='dok'?'dokDropZone':'galeriDropZone').classList.remove('dragover');
+  if(!e.dataTransfer.files||!e.dataTransfer.files[0]) return;
+  processFile(e.dataTransfer.files[0],type);
+}
+function processFile(file,type){
+  var maxBytes=5*1024*1024;
+  if(file.size>maxBytes){alert('File terlalu besar. Maksimal 5MB.');return;}
+
+  // Validasi tipe
+  var allowed=type==='dok'
+    ?['application/pdf','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel','text/csv']
+    :['image/jpeg','image/jpg','image/png'];
+  if(!allowed.includes(file.type)){
+    alert(type==='dok'?'Format tidak didukung. Gunakan PDF, Excel, atau CSV.'
+      :'Format tidak didukung. Gunakan JPG, JPEG, atau PNG.');
+    return;
+  }
+
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var base64Full=e.target.result;
+    var base64=base64Full.split(',')[1];
+    var data={base64:base64,mimeType:file.type,name:file.name,size:file.size};
+    if(type==='dok') _dokFileData=data;
+    else _galeriFileData=data;
+
+    // Mostrar info file
+    var chosenEl=document.getElementById(type==='dok'?'dokFileChosen':'galeriFileChosen');
+    var nameEl=document.getElementById(type==='dok'?'dokFileName':'galeriFileName');
+    var sizeEl=document.getElementById(type==='dok'?'dokFileSize':'galeriFileSize');
+    nameEl.textContent=file.name;
+    sizeEl.textContent='('+Math.round(file.size/1024)+' KB)';
+    chosenEl.style.display='flex';
+
+    // Preview gambar
+    if(type==='galeri'&&file.type.startsWith('image/')){
+      document.getElementById('galeriPreviewImg').src=base64Full;
+      document.getElementById('galeriPreview').style.display='block';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+function clearFile(type){
+  if(type==='dok') _dokFileData=null;
+  else _galeriFileData=null;
+  var chosenEl=document.getElementById(type==='dok'?'dokFileChosen':'galeriFileChosen');
+  chosenEl.style.display='none';
+  var inp=document.getElementById(type==='dok'?'dokFileInput':'galeriFileInput');
+  inp.value='';
+  if(type==='galeri'){
+    document.getElementById('galeriPreview').style.display='none';
+  }
+}
+function showProgress(type,pct,txt){
+  var el=document.getElementById(type+'Progress');
+  var bar=document.getElementById(type+'ProgressBar');
+  var label=document.getElementById(type+'ProgressText');
+  el.style.display='block';
+  bar.style.width=pct+'%';
+  label.textContent=txt;
+}
+function hideProgress(type){
+  document.getElementById(type+'Progress').style.display='none';
+}
+
+// ════════════════════════════════════════════════
+//  KELOLA PROKER
+// ════════════════════════════════════════════════
+function openProkerModal(rowIdx){
+  _editProkerIdx=(rowIdx!==undefined)?rowIdx:null;
+  document.getElementById('prokerModalTitle').textContent=_editProkerIdx!==null?'Edit Proker':'Tambah Proker';
+  document.getElementById('btnSimpanProker').textContent=_editProkerIdx!==null?'Simpan Perubahan':'Tambah';
+  document.getElementById('fNama').value='';
+  document.getElementById('fPJ').value='';
+  document.getElementById('fMulai').value='';
+  document.getElementById('fSelesai').value='';
+  document.getElementById('fStatus').value='Belum';
+  if(_editProkerIdx!==null){
+    var d=prokerData[_editProkerIdx];
+    document.getElementById('fNama').value=d.nama;
+    document.getElementById('fPJ').value=d.pj;
+    document.getElementById('fMulai').value=toInputDate(d.mulai);
+    document.getElementById('fSelesai').value=toInputDate(d.selesai);
+    document.getElementById('fStatus').value=d.status;
+  }
+  document.getElementById('modalProker').classList.add('show');
+  document.getElementById('fNama').focus();
+}
+function closeProkerModal(){document.getElementById('modalProker').classList.remove('show');}
+
+function toInputDate(d){
+  if(!d) return '';
+  var dt=(d instanceof Date)?d:new Date(d);
+  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+}
+function simpanProker(){
+  var nama=document.getElementById('fNama').value.trim();
+  var pj=document.getElementById('fPJ').value.trim();
+  var mulai=document.getElementById('fMulai').value;
+  var selesai=document.getElementById('fSelesai').value;
+  var status=document.getElementById('fStatus').value;
+  if(!nama||!pj||!mulai||!selesai){alert('Semua field wajib diisi.');return;}
+  if(selesai<mulai){alert('Tanggal selesai harus setelah tanggal mulai.');return;}
+  var btn=document.getElementById('btnSimpanProker');
+  btn.disabled=true;btn.textContent='Menyimpan...';
+  var row=[nama,pj,mulai,selesai,status];
+  if(_editProkerIdx!==null){
+    var sheetRow=_editProkerIdx+2;
+    gasPost({action:'updateProker', sheetRow:sheetRow, row:row})
+  .then(function(res){
+    btn.disabled=false;closeProkerModal();
+    if(res.success){
+      prokerData[_editProkerIdx]={nama:nama,pj:pj,mulai:pd(mulai),selesai:pd(selesai),status:status};
+      renderKelolaTable();
+      loadProker(prokerData.map(function(d){return[d.nama,d.pj,toInputDate(d.mulai),toInputDate(d.selesai),d.status];}));
+    } else {alert('Gagal: '+res.message);}
+    btn.textContent='Simpan Perubahan';
+  })
+  .catch(function(err){btn.disabled=false;btn.textContent='Simpan Perubahan';alert('Error: '+err.message);});
+  } else {
+    gasPost({action:'addProker', row:row})
+  .then(function(res){
+    btn.disabled=false;closeProkerModal();
+    if(res.success){
+      prokerData.push({nama:nama,pj:pj,mulai:pd(mulai),selesai:pd(selesai),status:status});
+      renderKelolaTable();
+      loadProker(prokerData.map(function(d){return[d.nama,d.pj,toInputDate(d.mulai),toInputDate(d.selesai),d.status];}));
+    } else {alert('Gagal: '+res.message);}
+    btn.textContent='Tambah';
+  })
+  .catch(function(err){btn.disabled=false;btn.textContent='Tambah';alert('Error: '+err.message);});
+  }
+}
+function hapusProker(idx){
+  if(!confirm('Hapus "'+prokerData[idx].nama+'"?')) return;
+  var sheetRow=idx+2;
+  gasPost({action:'deleteProker', sheetRow:sheetRow})
+  .then(function(res){
+    if(res.success){
+      prokerData.splice(idx,1);renderKelolaTable();
+      loadProker(prokerData.map(function(d){return[d.nama,d.pj,toInputDate(d.mulai),toInputDate(d.selesai),d.status];}));
+    } else {alert('Gagal: '+res.message);}
+  })
+  .catch(function(err){alert('Error: '+err.message);});
+}
+function renderKelolaTable(){
+  var tbody=document.getElementById('kelolaBody');
+  tbody.innerHTML='';
+  if(!prokerData.length){
+    var tr=document.createElement('tr');
+    var td=document.createElement('td');td.colSpan=6;
+    td.style.cssText='text-align:center;color:#bbb;padding:32px';
+    td.textContent='Belum ada data proker.';
+    tr.appendChild(td);tbody.appendChild(tr);return;
+  }
+  var colors={belum:'#f0f0f0',proses:'#fef3c7',selesai:'#dcfce7'};
+  var tcolors={belum:'#777',proses:'#b45309',selesai:'#166534'};
+  prokerData.forEach(function(d,i){
+    var sk=d.status.toLowerCase();
+    var tr=document.createElement('tr');
+    var cells=[
+      function(){var td=document.createElement('td');td.style.fontWeight='600';td.textContent=d.nama;return td;},
+      function(){var td=document.createElement('td');td.textContent=d.pj;return td;},
+      function(){var td=document.createElement('td');td.textContent=fmtD(d.mulai);return td;},
+      function(){var td=document.createElement('td');td.textContent=fmtD(d.selesai);return td;},
+      function(){
+        var td=document.createElement('td');
+        var sp=document.createElement('span');
+        sp.style.cssText='background:'+colors[sk]+';color:'+tcolors[sk]+';padding:2px 9px;border-radius:18px;font-size:11px;font-weight:600';
+        sp.textContent=d.status;td.appendChild(sp);return td;
+      },
+      function(){
+        var td=document.createElement('td');
+        var div=document.createElement('div');div.className='tbl-actions';
+        var be=document.createElement('button');be.className='btn-edit';be.textContent='Edit';
+        be.onclick=function(){openProkerModal(i);};
+        var bd=document.createElement('button');bd.className='btn-del';bd.textContent='Hapus';
+        bd.onclick=function(){hapusProker(i);};
+        div.appendChild(be);div.appendChild(bd);td.appendChild(div);return td;
+      }
+    ];
+    cells.forEach(function(fn){tr.appendChild(fn());});
+    tbody.appendChild(tr);
+  });
+}
+
+// ════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════
+var PAGE_LABELS={beranda:'Beranda',timeline:'Timeline Proker',anggota:'Anggota',
+  lokasi:'Lokasi',dokumentasi:'Dokumentasi',galeri:'Galeri Foto',kelola:'Kelola Proker'};
+function goPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.toggle('active',n.dataset.page===id);});
+  document.getElementById('tbTitle').textContent=PAGE_LABELS[id]||id;
+  document.getElementById('tbBc').textContent=PAGE_LABELS[id]||id;
+  if(id==='kelola') renderKelolaTable();
+}
+function showLp(){document.getElementById('lpOverlay').classList.add('show');}
+function closeLp(){document.getElementById('lpOverlay').classList.remove('show');}
+
+// ════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════
+function dB(a,b){return Math.round((b-a)/86400000);}
+function aD(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function fmtD(d){return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});}
+
+// ════════════════════════════════════════════════
+//  DEMO MODE — hapus saat deploy ke GAS
+// ════════════════════════════════════════════════
+if(typeof google==='undefined'){
+  var _U={admin:{pw:'admin123',nama:'Administrator',role:'admin',email:'admin@kkn.id'}};
+  var _AUTH='KKN2025';
+  window.google={script:{run:new Proxy({},{
+    get:function(_,method){
+      var sh,fh;
+      var o={
+        withSuccessHandler:function(fn){sh=fn;return o;},
+        withFailureHandler:function(fn){fh=fn;return o;}
+      };
+      o[method]=function(){
+        var args=arguments;
+        setTimeout(function(){
+          try{
+            var res;
+            if(method==='loginUser'){
+              var u=args[0].trim().toLowerCase(),p=args[1];
+              if(!_U[u]) res={success:false,message:'Username tidak ditemukan.'};
+              else if(_U[u].pw!==p) res={success:false,message:'Password salah.'};
+              else res={success:true,user:{username:u,nama:_U[u].nama,role:_U[u].role}};
+            }
+            else if(method==='registerUser'){
+              var un=args[0].trim().toLowerCase(),nm=args[1],em=args[2],pw=args[3],kd=args[4];
+              if(kd!==_AUTH) res={success:false,message:'Kode autentikasi tidak valid.'};
+              else if(_U[un]) res={success:false,message:'Username sudah digunakan.'};
+              else if(pw.length<6) res={success:false,message:'Password minimal 6 karakter.'};
+              else{_U[un]={pw:pw,nama:nm,email:em,role:'member'};res={success:true,message:'Akun berhasil dibuat! Silakan login.'};}
+            }
+            else if(method==='requestPasswordReset'){
+              var em=args[0];
+              var found=Object.keys(_U).filter(function(u){return _U[u].email===em;});
+              if(!found.length) res={success:false,message:'Email tidak terdaftar.'};
+              else res={success:true};
+            }
+            else if(method==='verifyOtp'){
+              var otp=args[1];
+              if(otp==='123456') res={success:true,token:'demo_user:123456'};
+              else res={success:false,message:'Kode salah. (Demo: gunakan 123456)'};
+            }
+            else if(method==='resetPassword'){
+              var tok=args[0],pw=args[1];
+              if(tok!=='demo_user:123456') res={success:false,message:'Token tidak valid.'};
+              else res={success:true,message:'Password berhasil diperbarui! Silakan login.'};
+            }
+            else if(method==='getSheetData'){
+              var t=new Date();t.setHours(0,0,0,0);
+              function dd(n){var x=new Date(t);x.setDate(x.getDate()+n);return x.toISOString();}
+              res=[
+                ['Sosialisasi Kesehatan','Budi Santoso',  dd(-20),dd(-10),'Selesai'],
+                ['Pelatihan UMKM',       'Ani Rahayu',    dd(-15),dd(5),  'Proses' ],
+                ['Pembuatan Taman Baca', 'Citra Dewi',    dd(-5), dd(15), 'Proses' ],
+                ['Penyuluhan Pertanian', 'Dodi Pratama',  dd(3),  dd(18), 'Belum'  ],
+                ['Digitalisasi UMKM',    'Eka Sari',      dd(-8), dd(0),  'Selesai'],
+                ['Workshop',             'Fajar Nugroho', dd(7),  dd(22), 'Belum'  ],
+                ['Bersih Desa',          'Gita Lestari',  dd(-3), dd(4),  'Proses' ],
+                ['Pendataan Penduduk',   'Hendra Wijaya', dd(10), dd(25), 'Belum'  ],
+              ];
+            }
+            else if(method==='uploadFileToDrive'){
+              // Demo: simulasi upload sukses
+              res={success:true,fileId:'demo_'+Date.now(),viewUrl:'#demo-file'};
+            }
+            else if(method==='getDokData'||method==='getGaleriData'){res=[];}
+            else if(method==='addProker'||method==='updateProker'||method==='deleteProker'){res={success:true};}
+            if(sh) sh(res);
+          }catch(e){if(fh)fh(e);}
+        },600);
+        return o;
+      };
+      return o[method];
+    }
+  })}};
+}
+</script>
+</body>
+</html>
