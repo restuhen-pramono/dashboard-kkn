@@ -929,17 +929,29 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e}
 // ════════════════════════════════════════════════
 //  STATE
 // ════════════════════════════════════════════════
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbyVWVvntKOwoAOnivdIdBxcnET0WW3iOl1cHnsCck1i/exec';
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbywrqxq6W-TrRpukMWd2_bzSY6YpK70cVjDrzhD3ESxmD2mWseUaqiow9mkYeoBPg8Vog/exec';
 
-function gasGet(action){
-  return fetch(GAS_URL+'?action='+action).then(function(r){return r.json();});
+// Semua request pakai GET
+function gasGet(action, params) {
+  var url = GAS_URL + '?action=' + action;
+  if (params) {
+    Object.keys(params).forEach(function(key) {
+      var val = params[key];
+      if (typeof val === 'object') val = JSON.stringify(val);
+      url += '&' + key + '=' + encodeURIComponent(val);
+    });
+  }
+  return fetch(url).then(function(r) { return r.json(); });
 }
-function gasPost(body){
-  return fetch(GAS_URL,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(body)
-  }).then(function(r){return r.json();});
+
+// gasPost sekarang pakai GET juga
+function gasPost(body) {
+  var action = body.action;
+  var params = {};
+  Object.keys(body).forEach(function(k) {
+    if (k !== 'action') params[k] = body[k];
+  });
+  return gasGet(action, params);
 }
 
 var currentUser  = null;
