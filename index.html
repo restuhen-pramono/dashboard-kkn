@@ -1545,23 +1545,26 @@ function simpanDok(){
   if(_dokFileData){
     // Upload ke Drive
     showProgress('dok',0,'Mengupload file...');
-    google.script.run
-      .withSuccessHandler(function(res){
-        btn.disabled=false;btn.textContent=_editDokIdx!==null?'Simpan Perubahan':'Simpan';
-        hideProgress('dok');
-        if(res.success){
-          saveDokItem({
-            judul:judul,tgl:tglFmt,tag:tag,ic:getDocIcon(tag),
-            bg:bgMap[tag]||'#e8f0fe',url:res.viewUrl,id:res.fileId||('d'+Date.now())
-          });
-          closeDokModal();renderDokumen();
-        } else {alert('Gagal upload: '+res.message);}
-      })
-      .withFailureHandler(function(err){
-        btn.disabled=false;hideProgress('dok');
-        alert('Error: '+err.message);
-      })
-      .uploadFileToDrive(_dokFileData.base64,_dokFileData.name,_dokFileData.mimeType,'Dokumentasi KKN');
+    gasPost({action:'uploadFile', base64:_dokFileData.base64,
+         name:_dokFileData.name, mimeType:_dokFileData.mimeType,
+         folder:'Dokumentasi KKN'})
+  .then(function(res){
+    btn.disabled=false;
+    btn.textContent=_editDokIdx!==null?'Simpan Perubahan':'Simpan';
+    hideProgress('dok');
+    if(res.success){
+      saveDokItem({
+        judul:judul,tgl:tglFmt,tag:tag,ic:getDocIcon(tag),
+        bg:bgMap[tag]||'#e8f0fe',url:res.viewUrl,
+        id:res.fileId||('d'+Date.now())
+      });
+      closeDokModal();renderDokumen();
+    } else {alert('Gagal upload: '+res.message);}
+  })
+  .catch(function(err){
+    btn.disabled=false;hideProgress('dok');
+    alert('Error: '+err.message);
+  });
   } else {
     saveDokItem({
       judul:judul,tgl:tglFmt,tag:tag,ic:getDocIcon(tag),
@@ -1669,19 +1672,23 @@ function simpanGaleri(){
 
   if(_galeriFileData){
     showProgress('galeri',0,'Mengupload foto...');
-    google.script.run
-      .withSuccessHandler(function(res){
-        btn.disabled=false;hideProgress('galeri');
-        if(res.success){
-          saveGaleriItem({id:res.fileId||('g'+Date.now()),cap:cap,ic:'📷',bg:'#dbeafe',url:res.viewUrl});
-          closeGaleriModal();renderGaleri();
-        } else {alert('Gagal upload: '+res.message);}
-      })
-      .withFailureHandler(function(err){
-        btn.disabled=false;hideProgress('galeri');
-        alert('Error: '+err.message);
-      })
-      .uploadFileToDrive(_galeriFileData.base64,_galeriFileData.name,_galeriFileData.mimeType,'Galeri KKN');
+    gasPost({action:'uploadFile', base64:_galeriFileData.base64,
+         name:_galeriFileData.name, mimeType:_galeriFileData.mimeType,
+         folder:'Galeri KKN'})
+  .then(function(res){
+    btn.disabled=false;hideProgress('galeri');
+    if(res.success){
+      saveGaleriItem({
+        id:res.fileId||('g'+Date.now()),
+        cap:cap,ic:'📷',bg:'#dbeafe',url:res.viewUrl
+      });
+      closeGaleriModal();renderGaleri();
+    } else {alert('Gagal upload: '+res.message);}
+  })
+  .catch(function(err){
+    btn.disabled=false;hideProgress('galeri');
+    alert('Error: '+err.message);
+  });
   } else {
     saveGaleriItem({id:'g'+Date.now(),cap:cap,ic:'📷',bg:'#dbeafe',url:url});
     btn.disabled=false;
@@ -1917,83 +1924,6 @@ function closeLp(){document.getElementById('lpOverlay').classList.remove('show')
 function dB(a,b){return Math.round((b-a)/86400000);}
 function aD(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
 function fmtD(d){return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});}
-
-// ════════════════════════════════════════════════
-//  DEMO MODE — hapus saat deploy ke GAS
-// ════════════════════════════════════════════════
-if(typeof google==='undefined'){
-  var _U={admin:{pw:'admin123',nama:'Administrator',role:'admin',email:'admin@kkn.id'}};
-  var _AUTH='KKN2025';
-  window.google={script:{run:new Proxy({},{
-    get:function(_,method){
-      var sh,fh;
-      var o={
-        withSuccessHandler:function(fn){sh=fn;return o;},
-        withFailureHandler:function(fn){fh=fn;return o;}
-      };
-      o[method]=function(){
-        var args=arguments;
-        setTimeout(function(){
-          try{
-            var res;
-            if(method==='loginUser'){
-              var u=args[0].trim().toLowerCase(),p=args[1];
-              if(!_U[u]) res={success:false,message:'Username tidak ditemukan.'};
-              else if(_U[u].pw!==p) res={success:false,message:'Password salah.'};
-              else res={success:true,user:{username:u,nama:_U[u].nama,role:_U[u].role}};
-            }
-            else if(method==='registerUser'){
-              var un=args[0].trim().toLowerCase(),nm=args[1],em=args[2],pw=args[3],kd=args[4];
-              if(kd!==_AUTH) res={success:false,message:'Kode autentikasi tidak valid.'};
-              else if(_U[un]) res={success:false,message:'Username sudah digunakan.'};
-              else if(pw.length<6) res={success:false,message:'Password minimal 6 karakter.'};
-              else{_U[un]={pw:pw,nama:nm,email:em,role:'member'};res={success:true,message:'Akun berhasil dibuat! Silakan login.'};}
-            }
-            else if(method==='requestPasswordReset'){
-              var em=args[0];
-              var found=Object.keys(_U).filter(function(u){return _U[u].email===em;});
-              if(!found.length) res={success:false,message:'Email tidak terdaftar.'};
-              else res={success:true};
-            }
-            else if(method==='verifyOtp'){
-              var otp=args[1];
-              if(otp==='123456') res={success:true,token:'demo_user:123456'};
-              else res={success:false,message:'Kode salah. (Demo: gunakan 123456)'};
-            }
-            else if(method==='resetPassword'){
-              var tok=args[0],pw=args[1];
-              if(tok!=='demo_user:123456') res={success:false,message:'Token tidak valid.'};
-              else res={success:true,message:'Password berhasil diperbarui! Silakan login.'};
-            }
-            else if(method==='getSheetData'){
-              var t=new Date();t.setHours(0,0,0,0);
-              function dd(n){var x=new Date(t);x.setDate(x.getDate()+n);return x.toISOString();}
-              res=[
-                ['Sosialisasi Kesehatan','Budi Santoso',  dd(-20),dd(-10),'Selesai'],
-                ['Pelatihan UMKM',       'Ani Rahayu',    dd(-15),dd(5),  'Proses' ],
-                ['Pembuatan Taman Baca', 'Citra Dewi',    dd(-5), dd(15), 'Proses' ],
-                ['Penyuluhan Pertanian', 'Dodi Pratama',  dd(3),  dd(18), 'Belum'  ],
-                ['Digitalisasi UMKM',    'Eka Sari',      dd(-8), dd(0),  'Selesai'],
-                ['Workshop',             'Fajar Nugroho', dd(7),  dd(22), 'Belum'  ],
-                ['Bersih Desa',          'Gita Lestari',  dd(-3), dd(4),  'Proses' ],
-                ['Pendataan Penduduk',   'Hendra Wijaya', dd(10), dd(25), 'Belum'  ],
-              ];
-            }
-            else if(method==='uploadFileToDrive'){
-              // Demo: simulasi upload sukses
-              res={success:true,fileId:'demo_'+Date.now(),viewUrl:'#demo-file'};
-            }
-            else if(method==='getDokData'||method==='getGaleriData'){res=[];}
-            else if(method==='addProker'||method==='updateProker'||method==='deleteProker'){res={success:true};}
-            if(sh) sh(res);
-          }catch(e){if(fh)fh(e);}
-        },600);
-        return o;
-      };
-      return o[method];
-    }
-  })}};
-}
 </script>
 </body>
 </html>
