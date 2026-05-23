@@ -1361,7 +1361,7 @@ function setupDashboard(user){
     document.getElementById('tbName').textContent=user.nama;
     document.getElementById('tbRole').textContent=user.role==='admin'?'Admin':'Anggota';
     document.getElementById('sbHello').textContent='Halo, '+user.nama.split(' ')[0];
-    document.getElementById('wMsg').textContent='Halo '+user.nama+'! Berikut ringkasan proker.';
+    document.getElementById('wMsg').textContent='Halo '+user.nama+'! Berikut ringkasan proker kami.';
     document.getElementById('guestBadge').style.display='none';
     document.getElementById('userInfoBox').style.display='block';
     document.getElementById('logoutLabel').textContent='Keluar';
@@ -2024,7 +2024,7 @@ initSidebar();
 window.addEventListener('resize', initSidebar);
 
 var PAGE_LABELS={beranda:'Beranda',timeline:'Timeline Proker',anggota:'Anggota',
-  lokasi:'Lokasi',dokumentasi:'Dokumentasi',galeri:'Galeri Foto',kelola:'Kelola Proker'};
+  lokasi:'Lokasi',dokumentasi:'Lampiran',galeri:'Galeri Foto',kelola:'Kelola Proker'};
 function goPage(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.getElementById('page-'+id).classList.add('active');
