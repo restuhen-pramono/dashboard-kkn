@@ -414,7 +414,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e}
 
   /* Topbar right */
   .tb-right{gap:6px}
-  .logout-btn span{display:none}
+  .logout-btn span{display:none} 
   .logout-btn{padding:5px 7px}
 
   /* Map */
@@ -691,7 +691,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e}
 
   <div id="dashMain">
     <div class="topbar">
-      <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('collapsed')">
+      <button class="hamburger"onclick="toggleSidebar()"
         <span></span><span></span><span></span>
       </button>
       <div>
@@ -1012,6 +1012,16 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e}
 </div>
 
 <script>
+
+function toggleSidebar(){
+  var sb=document.getElementById('sidebar');
+  var ov=document.getElementById('sidebarOverlay');
+  sb.classList.toggle('collapsed');
+  // Tampilkan overlay hanya di mobile
+  if(window.innerWidth<=768){
+    ov.style.display=sb.classList.contains('collapsed')?'none':'block';
+  }
+}
 // ════════════════════════════════════════════════
 //  STATE
 // ════════════════════════════════════════════════
@@ -1369,6 +1379,10 @@ function setupDashboard(user){
     n.onclick=function(){
       if(guest&&n.dataset.page==='kelola'){showLp();return;}
       goPage(n.dataset.page);
+      // Auto tutup sidebar setelah klik menu di mobile
+      if(window.innerWidth<=768){
+        document.getElementById('sidebar').classList.add('collapsed');
+      }
     };
   });
   document.querySelectorAll('.fbtn').forEach(function(b){
@@ -1991,6 +2005,15 @@ function renderKelolaTable(){
 // ════════════════════════════════════════════════
 //  NAVIGATION
 // ════════════════════════════════════════════════
+// Auto collapse sidebar di mobile
+function initSidebar(){
+  if(window.innerWidth<=768){
+    document.getElementById('sidebar').classList.add('collapsed');
+  }
+}
+initSidebar();
+window.addEventListener('resize', initSidebar);
+
 var PAGE_LABELS={beranda:'Beranda',timeline:'Timeline Proker',anggota:'Anggota',
   lokasi:'Lokasi',dokumentasi:'Dokumentasi',galeri:'Galeri Foto',kelola:'Kelola Proker'};
 function goPage(id){
@@ -2010,6 +2033,13 @@ function closeLp(){document.getElementById('lpOverlay').classList.remove('show')
 function dB(a,b){return Math.round((b-a)/86400000);}
 function aD(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
 function fmtD(d){return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});}
+function closeSidebarMobile(){
+  document.getElementById('sidebar').classList.add('collapsed');
+  document.getElementById('sidebarOverlay').style.display='none';
+}
 </script>
+<!-- Overlay untuk tutup sidebar di mobile -->
+<div id="sidebarOverlay" onclick="closeSidebarMobile()"
+  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99"></div>
 </body>
 </html>
