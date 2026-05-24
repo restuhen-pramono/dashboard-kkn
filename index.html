@@ -26,8 +26,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e}
 .branding{text-align:center;margin-bottom:24px}
 .brand-badge{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.1);border-radius:50px;padding:8px 18px 8px 10px}
-.brand-icon{width:34px;height:34px;background:linear-gradient(135deg,#0f3460,#e94560);
-  border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff}
+.brand-icon{width:34px;height:34px;border-radius:9px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .brand-label{color:#fff;font-size:14px;font-weight:700}
 .brand-sub{color:rgba(255,255,255,.4);font-size:12px;margin-top:6px}
 .login-card{background:#fff;border-radius:22px;padding:32px;box-shadow:0 24px 64px rgba(0,0,0,.4)}
@@ -444,10 +444,12 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e}
   <div class="login-wrap">
     <div class="branding">
       <div class="brand-badge">
-        <div class="brand-icon">PG</div>
-        <span class="brand-label">Dashboard PLENGER</span>
+        <div class="brand-icon">
+          <img src="logokkn.png" alt="KKN" style="width:100%;height:100%;object-fit:contain;border-radius:9px;">
+        </div>
+        <span class="brand-label">DASHBOARD KKN 01 DESA TOWANGSAN</span>
       </div>
-      <div class="brand-sub">PRABOWO &nbsp;·&nbsp; GIBRAN</div>
+      <div class="brand-sub">KKN-M Kependidikan</div>
     </div>
 
     <div class="login-card">
@@ -464,7 +466,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e}
       <!-- MASUK -->
       <div class="form-pane" id="paneMasuk" style="display:block">
         <div class="form-title">Selamat datang</div>
-        <div class="form-sub">Masuk ke dashboard Presiden Anda</div>
+        <div class="form-sub">Masuk ke dashboard KKN Anda</div>
         <div class="fgroup">
           <label>Username</label>
           <div class="iwrap">
@@ -1068,14 +1070,16 @@ var _resetToken    = null;
 //  STATIC DATA
 // ════════════════════════════════════════════════
 var ANGGOTA=[
-  {nama:'Ahmad Rifai',   nim:'20210001',prodi:'Teknik Informatika',peran:'Ketua',     warna:'#0f3460'},
-  {nama:'Budi Santoso',  nim:'20210042',prodi:'Ilmu Komunikasi',   peran:'Sekretaris',warna:'#166534'},
-  {nama:'Citra Dewi',    nim:'20210087',prodi:'Pend. Biologi',     peran:'Bendahara', warna:'#7e22ce'},
-  {nama:'Dodi Pratama',  nim:'20210123',prodi:'Hukum',             peran:'Anggota',   warna:'#b45309'},
-  {nama:'Eka Sari',      nim:'20210156',prodi:'Ekonomi',           peran:'Anggota',   warna:'#c2410c'},
-  {nama:'Fajar Nugroho', nim:'20210178',prodi:'Teknik Sipil',      peran:'Anggota',   warna:'#0369a1'},
-  {nama:'Gita Lestari',  nim:'20210203',prodi:'Psikologi',         peran:'Anggota',   warna:'#be185d'},
-  {nama:'Hendra Wijaya', nim:'20210234',prodi:'Pertanian',         peran:'Anggota',   warna:'#065f46'},
+  {nama:'Winston Adolf Jonathan Butar Butar',   nim:'23050630075',prodi:'Pend. Teknik Mekatronika',peran:'Ketua',     warna:'#0f3460'},
+  {nama:'Mauza Anggi Dwi Saputri',  nim:'23030530098',prodi:'Pend. IPA',   peran:'Sekretaris',warna:'#166534'},
+  {nama:'Syiflana Rahmadhani Ma’rufah',    nim:'23030530125',prodi:'Pend. IPA',     peran:'Bendahara', warna:'#7e22ce'},
+  {nama:'Dewi Indah Mustika',  nim:'23030530097',prodi:'Pend. IPA',             peran:'Humas',   warna:'#b45309'},
+  {nama:'Ibrahim Sani Baihaqi',      nim:'23050630081',prodi:'Pend. Teknik Mekatronika',           peran:'PDD',   warna:'#c2410c'},
+  {nama:'Ahmad Dani Lazuardi', nim:'23010630074',prodi:'Pend. Guru Sekolah Dasar',      peran:'PDD',   warna:'#0369a1'},
+  {nama:'Sabrina Laila Azahra',  nim:'23020130186',prodi:'Pend. Bahasa dan Sastra Indonesia',         peran:'Perlengkapan',   warna:'#be185d'},
+  {nama:'Ameliya Pujilestari', nim:'23020130196',prodi:'Pend. Bahasa dan Sastra Indonesia',         peran:'PDD',   warna:'#065f46'},
+  {nama:'Muhammad Fahmi Fahrudin',  nim:'23010630022',prodi:'Pend. Guru Sekolah Dasar',         peran:'Humas',   warna:'##e8f0fe'},
+  {nama:'Restu Hendra Pramono', nim:'23050630083',prodi:'Pend. Teknik Mekatronika',         peran:'Perlengkapan',   warna:'#f0fdf4'},
 ];
 var DOK_DEFAULT=[
   {id:'d1',judul:'Laporan Mingguan 1',tgl:'5 Jul 2025', tag:'Laporan',ic:'📄',bg:'#e8f0fe',url:''},
